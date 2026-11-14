@@ -1,0 +1,1399 @@
+{% extends "base.html" %}
+
+{% block title %}SkillPath AI — Adaptive Career & Skill-Gap Intelligence · Learner Operations Dashboard{% endblock %}
+
+{% block extra_head %}
+<!-- Tailwind CSS CDN directly in head -->
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell space-y-6">
+
+  <!-- =========================================================================
+       1. Hero Learner Banner & Circular Readiness Ring (Coursera + Linear)
+       ========================================================================= -->
+  <header class="bg-white border border-[#E2E8F0] rounded-2xl p-6 lg:p-8 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+    <div class="flex items-center gap-5 flex-1 min-w-[300px]">
+      <div class="relative shrink-0">
+        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-[#0056D2] to-[#1D4ED8] text-white flex items-center justify-center text-2xl font-black shadow-md">
+          {{ profile.name[:2]|upper }}
+        </div>
+        <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#10B981] text-white text-[10px] font-black flex items-center justify-center border-2 border-white shadow-sm" title="Validated Identity">
+          ✓
+        </div>
+      </div>
+
+      <div class="flex flex-col">
+        <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+          <span class="text-xs font-bold bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2.5 py-0.5 rounded-full">
+            Goal: {{ profile.career }}
+          </span>
+          <span class="text-xs font-semibold bg-[#F1F5F9] text-[#334155] border border-[#E2E8F0] px-2.5 py-0.5 rounded-full">
+            {{ profile.experience_level }}
+          </span>
+          {% if plan.evaluation.needs_remediation %}
+            <span class="text-xs font-bold bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] px-2.5 py-0.5 rounded-full animate-pulse">
+              ⚠️ Active Remediation Mode
+            </span>
+          {% else %}
+            <span class="text-xs font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] px-2.5 py-0.5 rounded-full">
+              ✓ Path Optimized
+            </span>
+          {% endif %}
+        </div>
+
+        <h1 class="text-2xl lg:text-3xl font-extrabold text-[#0F172A] tracking-tight leading-tight">
+          {{ profile.name }}
+        </h1>
+
+        <div class="flex items-center gap-2 text-xs text-[#64748B] mt-1 flex-wrap">
+          <span class="inline-flex items-center gap-1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+            {{ profile.education }}
+          </span>
+          <span>&bull;</span>
+          <span class="inline-flex items-center gap-1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+            {{ profile.projects or 'Portfolio Candidate' }}
+          </span>
+        </div>
+
+        <!-- Inline Strengths & Gaps Pills in Hero -->
+        <div class="flex items-center gap-3 mt-3 flex-wrap">
+          <div class="flex items-center gap-1.5 text-xs">
+            <span class="font-bold text-[#059669]">Strengths:</span>
+            {% for s in plan.analysis.strengths[:3] %}
+              <span class="bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] px-2 py-0.5 rounded text-[11px] font-bold">
+                ✓ {{ s.name }}
+              </span>
+            {% endfor %}
+          </div>
+          <div class="flex items-center gap-1.5 text-xs">
+            <span class="font-bold text-[#D97706]">Priority Gaps:</span>
+            {% for m in plan.analysis.missing[:3] %}
+              <span class="bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A] px-2 py-0.5 rounded text-[11px] font-bold">
+                ⚡ {{ m.name }}
+              </span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SVG Circular Progress Ring (Role Readiness %) -->
+    <div class="flex items-center justify-center px-4 shrink-0">
+      <div class="relative w-28 h-28 flex items-center justify-center">
+        <svg class="w-28 h-28 transform -rotate-90" viewBox="0 0 120 120" role="img" aria-label="Role Readiness Progress Gauge: {{ plan.matching.target_readiness_pct }}%">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#E2E8F0" stroke-width="9" />
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#0056D2" stroke-width="9"
+                  stroke-linecap="round"
+                  stroke-dasharray="314.159"
+                  stroke-dashoffset="{{ 314.159 * (1 - plan.matching.target_readiness_pct / 100) }}"
+                  class="transition-all duration-700 ease-out" />
+        </svg>
+        <div class="absolute flex flex-col items-center justify-center text-center">
+          <span class="text-2xl font-black text-[#0F172A] tracking-tight leading-none">{{ plan.matching.target_readiness_pct }}%</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-[#64748B] mt-1">Readiness</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero Action Buttons with 1-Line Subtitles -->
+    <div class="flex flex-col gap-2.5 min-w-[240px] shrink-0">
+      <div>
+        <button class="w-full inline-flex items-center justify-center gap-2 bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm transition-all hover:-translate-y-0.5" onclick="openAssessmentModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>Take Skill Assessment</span>
+        </button>
+        <span class="text-[10px] text-[#64748B] block mt-0.5 text-center">Test skills with 5 questions; score &lt;60% dynamically triggers remediation</span>
+      </div>
+
+      <div class="flex gap-2">
+        <a href="{{ url_for('mentor') }}" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-white hover:bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] text-xs font-bold py-2 px-3 rounded-lg shadow-sm transition-all">
+          <span>Ask AI Mentor</span>
+        </a>
+        <a href="{{ url_for('certificate') }}" class="inline-flex items-center justify-center gap-1.5 bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0] text-xs font-bold py-2 px-3 rounded-lg shadow-sm transition-all" title="View official printable career certificate">
+          <span>🎓 Verified Certificate</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       Feature 2 & 3 Toolbar: Resume Auto-Extractor & Live 4-Agent Visualizer
+       ========================================================================= -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+    
+    <!-- Resume Auto-Extractor Card -->
+    <div class="lg:col-span-8 bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">📄</span>
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#0056D2]">Resume &amp; Bio Skill Auto-Extractor</h3>
+        </div>
+        <span class="text-[10px] font-bold text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded">Heuristic NLP Parser</span>
+      </div>
+      <p class="text-xs text-[#64748B] mb-3">Paste your resume, LinkedIn bio, or project description below to auto-detect skills and immediately generate a tailored 4-agent roadmap:</p>
+      
+      <form action="{{ url_for('extract_resume') }}" method="POST" class="space-y-2.5">
+        <label for="dashboardResumeText" class="sr-only">Paste technical resume, LinkedIn bio, or project description</label>
+        <textarea id="dashboardResumeText" name="resume_text" rows="2" required placeholder="Paste technical summary (e.g. 'Software Engineer with experience in Python, SQL, Docker, React, and building RESTful APIs with PostgreSQL')..." class="w-full text-xs p-3 border border-[#CBD5E1] rounded-xl focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 resize-none"></textarea>
+        <div class="flex items-center justify-between">
+          <span class="text-[10.5px] text-[#64748B]">Detects 60+ programming languages, frameworks, cloud platforms &amp; databases</span>
+          <button type="submit" class="bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition-all hover:scale-102">
+            Auto-Extract Skills &amp; Recalculate Roadmap →
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Live 4-Agent Visualizer Trigger Card -->
+    <div class="lg:col-span-4 bg-gradient-to-br from-[#1E293B] to-[#0F172A] text-white border border-[#334155] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[10.5px] font-extrabold uppercase tracking-wider text-[#38BDF8]">MULTI-AGENT ENGINE</span>
+          <span class="w-2 h-2 rounded-full bg-[#10B981] animate-ping"></span>
+        </div>
+        <h3 class="text-sm font-extrabold text-white mb-1">Live 4-Agent Execution</h3>
+        <p class="text-xs text-[#94A3B8] leading-relaxed mb-3">
+          Watch all 4 agents coordinate step-by-step: Skill Analyzer &rarr; Career Matcher &rarr; Roadmap Architect &rarr; AI Mentor.
+        </p>
+      </div>
+
+      <button type="button" onclick="startLiveAgentVisualizer()" class="w-full bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-extrabold py-2.5 px-3 rounded-lg shadow-sm transition-all hover:scale-102 flex items-center justify-center gap-2">
+        <span>⚡ Run Live 4-Agent Deep Analysis</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- =========================================================================
+       Feature 3: Job Description (JD) Match Analyzer Widget
+       ========================================================================= -->
+  <section class="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm">
+    <div class="flex items-center justify-between border-b border-[#E2E8F0] pb-3 mb-4 flex-wrap gap-2">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl">🎯</span>
+        <div>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#0056D2]">COMPETENCY BENCHMARKING</span>
+          <h2 class="text-base sm:text-lg font-extrabold text-[#0F172A]">Job Description (JD) Match Analyzer</h2>
+        </div>
+      </div>
+      <span class="text-xs font-bold bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-3 py-1 rounded-full">
+        Real-Time Semantic Gap Benchmarker
+      </span>
+    </div>
+
+    <p class="text-xs text-[#64748B] mb-4 leading-relaxed">
+      Paste any live target job posting, LinkedIn job description, or company technical requirements below. Our <strong>Skill Analyzer</strong> and <strong>Career Matcher Agents</strong> will extract required technologies, benchmark them against your verified profile, and display your match percentage with highlighted green matched vs red missing skills.
+    </p>
+
+    <div class="space-y-3">
+      <div class="flex items-center gap-2 flex-wrap text-xs">
+        <span class="text-[11px] font-bold text-[#64748B]">Try Sample JD:</span>
+        <button type="button" onclick="loadSampleJd('fullstack')" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] hover:bg-[#DBEAFE] transition-all">
+          ⚡ Full Stack Developer
+        </button>
+        <button type="button" onclick="loadSampleJd('ai')" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[#F5F3FF] text-[#7C3AED] border border-[#DDD6FE] hover:bg-[#EDE9FE] transition-all">
+          ⚡ AI Engineer
+        </button>
+        <button type="button" onclick="loadSampleJd('devops')" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] hover:bg-[#D1FAE5] transition-all">
+          ⚡ DevOps &amp; Cloud
+        </button>
+      </div>
+
+      <div class="relative">
+        <label for="jdInputText" class="sr-only">Paste full Job Description to match against your skills</label>
+        <textarea id="jdInputText" rows="3" placeholder="Paste full Job Description here (e.g. 'Senior Full Stack Engineer: Must have React, Node.js, TypeScript, PostgreSQL, Docker, AWS, and experience designing resilient REST APIs')..." class="w-full text-xs p-4 border border-[#CBD5E1] rounded-xl focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 resize-none font-sans leading-relaxed"></textarea>
+      </div>
+
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <span class="text-[11px] text-[#64748B]">Audits required skills against your verified skills: <strong class="text-[#0F172A]">{{ profile.skills }}</strong></span>
+        <button type="button" onclick="runJdMatchAnalysis()" id="jdAnalyzeBtn" class="bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-5 py-2.5 rounded-lg shadow-sm transition-all hover:scale-102 flex items-center gap-2">
+          <span>🎯 Analyze JD Match %</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Dynamic JD Results Output Box (Initially Hidden) -->
+    <div id="jdResultsContainer" class="mt-5 p-5 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] space-y-4" style="display:none;">
+      <div class="flex items-center justify-between border-b border-[#E2E8F0] pb-3 flex-wrap gap-2">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full border-4 border-[#0056D2] bg-white flex items-center justify-center font-black text-sm text-[#0056D2] shadow-sm">
+            <span id="jdMatchPctText">0%</span>
+          </div>
+          <div>
+            <h4 class="text-sm font-extrabold text-[#0F172A]" id="jdDetectedRoleTitle">Target Role Alignment</h4>
+            <span class="text-xs text-[#64748B]" id="jdMatchSubtitle">Role match calculated against your verified competencies</span>
+          </div>
+        </div>
+        <span id="jdMatchBadge" class="text-xs font-extrabold px-3 py-1 rounded-full"></span>
+      </div>
+
+      <!-- Matched vs Missing Badges Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+        <!-- Matched Skills (Green) -->
+        <div class="bg-white border border-[#A7F3D0] rounded-xl p-4 shadow-2xs">
+          <div class="flex items-center gap-2 mb-2 text-[#059669] font-extrabold">
+            <span>✓</span>
+            <span class="uppercase tracking-wider">Matched Skills (You Have These)</span>
+          </div>
+          <div id="jdMatchedSkillsList" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- Missing Skills (Red/Amber) -->
+        <div class="bg-white border border-[#FECACA] rounded-xl p-4 shadow-2xs">
+          <div class="flex items-center gap-2 mb-2 text-[#DC2626] font-extrabold">
+            <span>✗</span>
+            <span class="uppercase tracking-wider">Missing Skills (Required by this JD)</span>
+          </div>
+          <div id="jdMissingSkillsList" class="flex flex-wrap gap-1.5"></div>
+        </div>
+      </div>
+
+      <!-- AI Mentor Actionable Recommendation -->
+      <div class="bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl p-3.5 text-xs text-[#1E40AF] flex items-start gap-2.5">
+        <span class="text-base shrink-0">🤖</span>
+        <div class="flex-1 leading-relaxed">
+          <strong class="block text-[#0056D2] mb-0.5">AI Mentor Recommendation for this Job Description:</strong>
+          <p id="jdMentorRecommendationText"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       Dynamic Remediation Alert Banner (Triggered when score < 60%)
+       ========================================================================= -->
+  {% if plan.evaluation.needs_remediation %}
+    <div class="bg-[#FEF2F2] border border-[#FECACA] border-l-4 border-l-[#EF4444] rounded-xl p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-start gap-3.5">
+        <div class="text-2xl shrink-0">⚠️</div>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="bg-[#EF4444] text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded tracking-wide">REMEDIATION TRIGGERED</span>
+            <h3 class="text-sm font-extrabold text-[#DC2626]">Adaptive Intervention Active: Assessment Score Fell Below 60%</h3>
+          </div>
+          <p class="text-xs text-[#334155] leading-relaxed">
+            Your latest score on <strong>{{ plan.evaluation.remedial_topic }}</strong> was
+            <strong class="text-[#DC2626] font-bold">{{ plan.evaluation.latest_percentage }}%</strong> (minimum threshold: 60%).
+            The <strong>Progress Evaluator Agent</strong> intervened and notified the
+            <strong>Roadmap Recommender Agent</strong> to dynamically inject
+            <span class="bg-[#FEE2E2] text-[#991B1B] font-bold px-1.5 py-0.5 rounded border border-[#FECACA]">Phase R: Refresher & Core Drills (Phase R: Accelerated Remediation Sprint)</span> into your curriculum.
+          </p>
+          <div class="mt-2 text-xs text-[#7F1D1D] bg-white/70 p-2 rounded-lg border border-[#FECACA]/60">
+            <strong>AI Mentor Guidance:</strong> <em>"{{ plan.evaluation.mentor_note }}"</em>
+          </div>
+        </div>
+      </div>
+      <div class="shrink-0">
+        <form action="{{ url_for('quick_assessment_demo') }}" method="POST">
+          <input type="hidden" name="mode" value="pass">
+          <input type="hidden" name="topic" value="{{ plan.evaluation.remedial_topic or 'JavaScript & Frontend Core' }}">
+          <button type="submit" class="bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition-all hover:scale-105 whitespace-nowrap">
+            ⚡ Retest &amp; Pass (Judge Demo)
+          </button>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- =========================================================================
+       2. KPI Stat Overview Cards
+       ========================================================================= -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Role Readiness Card -->
+    <div class="bg-white border border-[#E2E8F0] border-t-4 border-t-[#0056D2] rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between text-xs font-bold text-[#64748B] mb-1">
+        <span>ROLE READINESS</span>
+        <span class="bg-[#EFF6FF] text-[#0056D2] text-[10px] px-2 py-0.5 rounded-full font-bold">{{ profile.career }}</span>
+      </div>
+      <div class="flex items-baseline gap-2 mb-2">
+        <span class="text-3xl font-extrabold text-[#0F172A]">{{ plan.matching.target_readiness_pct }}%</span>
+        <span class="text-xs text-[#64748B]">role fit score</span>
+      </div>
+      <div class="w-full bg-[#F1F5F9] h-2 rounded-full overflow-hidden">
+        <div class="bg-[#0056D2] h-full rounded-full" style="width: {{ plan.matching.target_readiness_pct }}%;"></div>
+      </div>
+    </div>
+
+    <!-- Verified Strengths Card -->
+    <div class="bg-white border border-[#E2E8F0] border-t-4 border-t-[#10B981] rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between text-xs font-bold text-[#64748B] mb-1">
+        <span>VERIFIED STRENGTHS</span>
+        <span class="bg-[#ECFDF5] text-[#059669] text-[10px] px-2 py-0.5 rounded-full font-bold">✓ {{ plan.analysis.strengths|length }} Validated</span>
+      </div>
+      <div class="flex items-baseline gap-2 mb-2">
+        <span class="text-3xl font-extrabold text-[#0F172A]">{{ plan.analysis.strengths|length }}</span>
+        <span class="text-xs text-[#64748B]">transferable competencies</span>
+      </div>
+      <div class="flex items-center gap-1 flex-wrap">
+        {% for s in plan.analysis.strengths[:3] %}
+          <span class="bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] px-1.5 py-0.5 rounded text-[10.5px] font-bold">{{ s.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Identified Skill Gaps Card -->
+    <div class="bg-white border border-[#E2E8F0] border-t-4 border-t-[#F59E0B] rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between text-xs font-bold text-[#64748B] mb-1">
+        <span>IDENTIFIED SKILL GAPS</span>
+        <span class="bg-[#FFFBEB] text-[#D97706] text-[10px] px-2 py-0.5 rounded-full font-bold">⚡ {{ plan.analysis.missing|length }} Critical</span>
+      </div>
+      <div class="flex items-baseline gap-2 mb-2">
+        <span class="text-3xl font-extrabold text-[#0F172A]">{{ plan.analysis.missing|length }}</span>
+        <span class="text-xs text-[#64748B]">to unlock career</span>
+      </div>
+      <div class="flex items-center gap-1 flex-wrap">
+        {% for m in plan.analysis.missing[:3] %}
+          <span class="bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A] px-1.5 py-0.5 rounded text-[10.5px] font-bold">{{ m.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Curriculum Velocity Card -->
+    <div class="bg-white border border-[#E2E8F0] border-t-4 border-t-[#7C3AED] rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between text-xs font-bold text-[#64748B] mb-1">
+        <span>CURRICULUM VELOCITY</span>
+        <span class="bg-[#F5F3FF] text-[#7C3AED] text-[10px] px-2 py-0.5 rounded-full font-bold">📍 SQLite Tracked</span>
+      </div>
+      <div class="flex items-baseline gap-2 mb-2">
+        <span class="text-3xl font-extrabold text-[#0F172A]">{{ plan.roadmap.progress_pct }}%</span>
+        <span class="text-xs text-[#64748B]">{{ plan.roadmap.completed_modules_count }}/{{ plan.roadmap.total_modules }} modules</span>
+      </div>
+      <div class="w-full bg-[#F1F5F9] h-2 rounded-full overflow-hidden">
+        <div class="bg-[#10B981] h-full rounded-full" style="width: {{ plan.roadmap.progress_pct }}%;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       Feature 7: India & Global Job Market Intelligence Card
+       ========================================================================= -->
+  <section class="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm">
+    <div class="flex items-center justify-between border-b border-[#E2E8F0] pb-3 mb-4">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl">🇮🇳 🌐</span>
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-[#0056D2]">COMPENSATION &amp; HIRING TELEMETRY</span>
+          <h2 class="text-base sm:text-lg font-extrabold text-[#0F172A]">India &amp; Global Job Market Intelligence: {{ profile.career }}</h2>
+        </div>
+      </div>
+      <span class="text-xs font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] px-3 py-1 rounded-full">
+        {{ market_intel.demand_trend }}
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4">
+        <span class="text-[11px] font-bold text-[#64748B] block mb-1">INDIA SALARY (INR ₹)</span>
+        <strong class="text-lg font-extrabold text-[#0F172A] block">{{ market_intel.salary_inr }}</strong>
+        <span class="text-xs text-[#059669] font-bold">Avg: {{ market_intel.avg_inr }}</span>
+      </div>
+
+      <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4">
+        <span class="text-[11px] font-bold text-[#64748B] block mb-1">GLOBAL SALARY (USD $)</span>
+        <strong class="text-lg font-extrabold text-[#0F172A] block">{{ market_intel.salary_usd }}</strong>
+        <span class="text-xs text-[#0056D2] font-bold">Avg: {{ market_intel.avg_usd }}</span>
+      </div>
+
+      <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4">
+        <span class="text-[11px] font-bold text-[#64748B] block mb-1">MARKET DEMAND VOLUME</span>
+        <strong class="text-lg font-extrabold text-[#D97706] block">{{ market_intel.open_positions }}</strong>
+        <span class="text-[11px] text-[#64748B]">Across top hiring boards</span>
+      </div>
+
+      <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4">
+        <span class="text-[11px] font-bold text-[#64748B] block mb-1">TOP RECRUITING FIRMS</span>
+        <div class="flex items-center gap-1.5 flex-wrap mt-1">
+          {% for emp in market_intel.top_employers[:4] %}
+            <span class="bg-white border border-[#CBD5E1] text-[#0F172A] text-[10.5px] font-bold px-2 py-0.5 rounded">
+              {{ emp }}
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 flex-wrap pt-2 border-t border-[#E2E8F0] text-xs">
+      <span class="font-bold text-[#64748B]">Core In-Demand Tech Stack:</span>
+      {% for skill in market_intel.top_skills %}
+        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2.5 py-0.5 rounded-full font-bold text-[11px]">
+          {{ skill }}
+        </span>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       Main Content Grid: Left Main (Roadmap & Skills) + Right Sidebar (Agents)
+       ========================================================================= -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+    <!-- LEFT COLUMN: Skills Matrix, Career Benchmarks, Phased Course Cards (8 cols) -->
+    <div class="lg:col-span-8 space-y-6">
+
+      <!-- SECTION: Clean Skill-Gap Matrix -->
+      <section class="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm" id="skill-gap-matrix">
+        <div class="flex items-start justify-between border-b border-[#E2E8F0] pb-3 mb-4 gap-4">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#0056D2]">COMPETENCY BENCHMARKING</span>
+            <h2 class="text-lg font-extrabold text-[#0F172A]">Skill-Gap Analysis &amp; Proficiency Matrix</h2>
+          </div>
+          <div class="inline-flex items-center gap-1.5 bg-[#F5F3FF] text-[#7C3AED] border border-[#DDD6FE] px-3 py-1 rounded-full text-xs font-bold shrink-0">
+            <span class="w-2 h-2 rounded-full bg-[#7C3AED]"></span>
+            <span>Skill Analyzer Agent</span>
+          </div>
+        </div>
+
+        <p class="text-xs text-[#64748B] mb-4">
+          Comparing learner competencies against required standards for <strong>{{ profile.career }}</strong>.
+          Strengths represent validated proficiencies; gaps represent high-priority learning targets.
+        </p>
+
+        <!-- Clean Side-by-Side Comparison Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          
+          <!-- Column 1: Verified Strengths -->
+          <div class="bg-[#FAFCFB] border border-[#E2E8F0] border-t-4 border-t-[#10B981] rounded-xl p-4">
+            <div class="flex items-center gap-2 border-b border-[#E2E8F0] pb-2 mb-3">
+              <span class="w-6 h-6 rounded-full bg-[#ECFDF5] text-[#10B981] font-bold text-xs flex items-center justify-center">✓</span>
+              <div>
+                <h3 class="text-xs font-extrabold text-[#0F172A]">Verified Strengths</h3>
+                <span class="text-[10px] text-[#64748B] block">Demonstrated Proficiencies</span>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              {% for item in plan.analysis.strengths %}
+                <div>
+                  <div class="flex items-center justify-between text-xs mb-1">
+                    <span class="font-bold text-[#0F172A]">{{ item.name }}</span>
+                    <span class="text-[10.5px] font-bold text-[#059669] bg-[#ECFDF5] px-1.5 py-0.2 rounded">{{ item.score }}%</span>
+                  </div>
+                  <div class="w-full bg-[#E2E8F0] h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-[#10B981] h-full rounded-full" style="width: {{ item.score }}%;"></div>
+                  </div>
+                  {% if item.evidence %}
+                    <span class="text-[10.5px] text-[#64748B] block mt-1">✓ {{ item.evidence }}</span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Column 2: Priority Skill Gaps -->
+          <div class="bg-[#FCFBF9] border border-[#E2E8F0] border-t-4 border-t-[#F59E0B] rounded-xl p-4">
+            <div class="flex items-center gap-2 border-b border-[#E2E8F0] pb-2 mb-3">
+              <span class="w-6 h-6 rounded-full bg-[#FFFBEB] text-[#F59E0B] font-bold text-xs flex items-center justify-center">⚡</span>
+              <div>
+                <h3 class="text-xs font-extrabold text-[#0F172A]">Priority Skill Gaps to Unlock Role</h3>
+                <span class="text-[10px] text-[#64748B] block">Targeted in Adaptive Roadmap</span>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              {% for item in plan.analysis.missing %}
+                <div>
+                  <div class="flex items-center justify-between text-xs mb-1">
+                    <span class="font-bold text-[#0F172A]">{{ item.name }}</span>
+                    <span class="text-[10.5px] font-bold text-[#D97706] bg-[#FFFBEB] px-1.5 py-0.2 rounded">Priority: {{ item.priority }}</span>
+                  </div>
+                  <div class="w-full bg-[#E2E8F0] h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-[#F59E0B] h-full rounded-full" style="width: 15%;"></div>
+                  </div>
+                  <span class="text-[10.5px] text-[#64748B] block mt-1">Targeted in Phases 1-3 of Personalized Curriculum</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SECTION: Cross-Role Readiness Benchmarks -->
+      <section class="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm" id="career-benchmarks">
+        <div class="flex items-start justify-between border-b border-[#E2E8F0] pb-3 mb-4 gap-4">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#0056D2]">MARKET MOBILITY</span>
+            <h2 class="text-lg font-extrabold text-[#0F172A]">Cross-Role Readiness Benchmarks</h2>
+          </div>
+          <div class="inline-flex items-center gap-1.5 bg-[#F0F9FF] text-[#0284C7] border border-[#BAE6FD] px-3 py-1 rounded-full text-xs font-bold shrink-0">
+            <span class="w-2 h-2 rounded-full bg-[#0284C7]"></span>
+            <span>Career Matcher Agent</span>
+          </div>
+        </div>
+
+        <p class="text-xs text-[#64748B] mb-4">
+          Current skill profile benchmarked against 5 in-demand tech roles. Switch your target with 1-click to dynamically reorient all collaborating agents.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {% for b in plan.matching.benchmarks %}
+            <div class="border rounded-xl p-4 flex flex-col justify-between transition-all {% if b.is_target %}border-2 border-[#0056D2] bg-[#EFF6FF]/40{% else %}border-[#E2E8F0] bg-white hover:border-[#BFDBFE]{% endif %}">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="font-extrabold text-xs text-[#0F172A]">{{ b.role }}</span>
+                  {% if b.is_target %}
+                    <span class="text-[9px] font-extrabold uppercase bg-[#0056D2] text-white px-2 py-0.5 rounded">Active Target</span>
+                  {% endif %}
+                </div>
+
+                <div class="flex items-baseline gap-2 mb-2">
+                  <span class="text-2xl font-black text-[#0F172A]">{{ b.readiness_pct }}%</span>
+                  <span class="text-xs text-[#64748B]">readiness fit</span>
+                </div>
+
+                <div class="w-full bg-[#E2E8F0] h-1.5 rounded-full overflow-hidden mb-3">
+                  <div class="bg-[#0056D2] h-full rounded-full" style="width: {{ b.readiness_pct }}%;"></div>
+                </div>
+
+                <div class="space-y-1 text-xs text-[#64748B] mb-3">
+                  <div class="flex justify-between"><span>Core Matches:</span> <strong class="text-[#0F172A]">{{ b.matched_count }}/{{ b.total_required }}</strong></div>
+                  <div class="flex justify-between"><span>Timeline:</span> <strong class="text-[#0F172A]">{{ b.estimated_weeks }}</strong></div>
+                  <div class="flex justify-between"><span>Demand:</span> <strong class="text-[#10B981]">{{ b.demand }}</strong></div>
+                </div>
+              </div>
+
+              <div>
+                {% if not b.is_target %}
+                  <form action="{{ url_for('switch_role') }}" method="POST">
+                    <input type="hidden" name="career" value="{{ b.role }}">
+                    <button type="submit" class="w-full text-xs font-bold text-[#0056D2] bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1">
+                      <span>Switch Target to {{ b.role }}</span>
+                      <span>→</span>
+                    </button>
+                  </form>
+                {% else %}
+                  <div class="text-center text-xs font-bold text-[#10B981] py-1">
+                    ✓ Current Focus Role
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- SECTION: Visual Coursera-Style Course & Roadmap Cards -->
+      <section class="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm" id="roadmap-curriculum">
+        <div class="flex items-start justify-between border-b border-[#E2E8F0] pb-3 mb-4 gap-4">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#0056D2]">CURRICULUM ARCHITECTURE</span>
+            <h2 class="text-lg font-extrabold text-[#0F172A]">Personalized Learning Roadmap</h2>
+          </div>
+          <div class="inline-flex items-center gap-1.5 bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] px-3 py-1 rounded-full text-xs font-bold shrink-0">
+            <span class="w-2 h-2 rounded-full bg-[#D97706]"></span>
+            <span>Roadmap &amp; Resource Recommender Agent</span>
+          </div>
+        </div>
+
+        <p class="text-xs text-[#64748B] mb-6">
+          Phased sequential milestones featuring curated free courses, interactive tutorials, and hands-on portfolio projects.
+          Check off modules as you complete them to track progress in SQLite.
+        </p>
+
+        <!-- Phased Containers Stack -->
+        <div class="space-y-6">
+          {% for phase in plan.roadmap.phases %}
+            <div class="border rounded-2xl overflow-hidden {% if phase.is_remedial %}border-2 border-[#EF4444] bg-[#FFFDFD]{% else %}border-[#E2E8F0] bg-white{% endif %}">
+              
+              <!-- Phase Lead Banner -->
+              <div class="p-4 border-b flex items-center justify-between gap-4 flex-wrap {% if phase.is_remedial %}bg-[#FEF2F2] border-[#FECACA]{% else %}bg-[#F8FAFC] border-[#E2E8F0]{% endif %}">
+                <div>
+                  <span class="text-[10px] font-extrabold uppercase tracking-wider block {% if phase.is_remedial %}text-[#DC2626]{% else %}text-[#0056D2]{% endif %}">
+                    {% if phase.is_remedial %}Phase R: Accelerated Remediation Sprint (Refresher &amp; Core Drills){% else %}Phase {{ phase.phase_number }}: {{ phase.title }}{% endif %}
+                  </span>
+                  <h3 class="text-base font-extrabold text-[#0F172A]">{{ phase.title }}</h3>
+                  <p class="text-xs text-[#64748B] mt-0.5">{{ phase.description }}</p>
+                </div>
+                <div>
+                  <span class="inline-flex items-center gap-1.5 text-xs font-bold bg-white border border-[#E2E8F0] px-3 py-1 rounded-full text-[#334155] shadow-sm">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    {{ phase.duration }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Module Course Cards in this Phase -->
+              <div class="p-5 space-y-4">
+                {% for mod in phase.modules %}
+                  <div class="border border-[#E2E8F0] rounded-xl p-5 shadow-sm hover:border-[#0056D2] transition-all {% if mod.completed %}border-l-4 border-l-[#10B981] bg-[#FAFCFA]{% else %}bg-white{% endif %} cursor-pointer" onclick="openLessonModal('{{ mod.id }}', '{{ mod.title|replace('\'', '\\\'') }}', '{{ mod.hours }}', '{{ mod.completed }}')">
+                    
+                    <!-- Course Header: Phase Tag, Difficulty, Hours, Status -->
+                    <div class="flex items-center justify-between gap-3 mb-2 flex-wrap">
+                      <div class="flex items-center gap-2">
+                        <span class="text-[10.5px] font-bold bg-[#F1F5F9] text-[#64748B] px-2 py-0.5 rounded">
+                          {% if phase.is_remedial %}Phase R: Accelerated Remediation Sprint{% else %}Phase {{ phase.phase_number }}{% endif %}
+                        </span>
+                        <span class="text-[10.5px] font-bold px-2 py-0.5 rounded {% if phase.is_remedial or phase.phase_number == '1' %}bg-[#EFF6FF] text-[#1D4ED8]{% elif phase.phase_number == '2' %}bg-[#FFFBEB] text-[#B45309]{% else %}bg-[#F5F3FF] text-[#6D28D9]{% endif %}">
+                          {% if phase.is_remedial or phase.phase_number == '1' %}Beginner{% elif phase.phase_number == '2' %}Intermediate{% else %}Advanced{% endif %}
+                        </span>
+                        <span class="inline-flex items-center gap-1 text-[11px] text-[#64748B] font-semibold">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                          {{ mod.hours }}
+                        </span>
+                      </div>
+
+                      <div>
+                        {% if mod.completed %}
+                          <span class="inline-flex items-center gap-1 text-xs font-bold text-[#059669] bg-[#ECFDF5] border border-[#A7F3D0] px-2.5 py-0.5 rounded-full">
+                            ✓ Completed
+                          </span>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <!-- Module Title -->
+                    <h4 class="text-sm font-extrabold text-[#0F172A] mb-2 leading-snug">{{ mod.title }}</h4>
+
+                    <!-- Skill Tags Gained -->
+                    <div class="flex items-center gap-2 mb-3 flex-wrap">
+                      <span class="text-[11px] font-bold text-[#64748B]">Skills Gained:</span>
+                      {% if 'javascript' in mod.title|lower %}
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">JavaScript ES6+</span>
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">DOM APIs</span>
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">Async/Await</span>
+                      {% elif 'react' in mod.title|lower %}
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">React 18</span>
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">Hooks &amp; State</span>
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">Component Design</span>
+                      {% elif 'node' in mod.title|lower or 'express' in mod.title|lower or 'api' in mod.title|lower %}
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">Node.js</span>
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">Express REST APIs</span>
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">Middleware</span>
+                      {% elif 'python' in mod.title|lower or 'pandas' in mod.title|lower or 'sql' in mod.title|lower %}
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">SQL Queries</span>
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">Data Cleaning</span>
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">Python Automation</span>
+                      {% else %}
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">Engineering Best Practices</span>
+                        <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full text-[10.5px] font-bold">Code Architecture</span>
+                      {% endif %}
+                    </div>
+
+                    <!-- Curated Resource Links (Coursera, MDN, freeCodeCamp, CS50) -->
+                    <div class="mb-3">
+                      <span class="text-[11px] font-bold text-[#64748B] block mb-1">Curated Resources:</span>
+                      <div class="flex items-center gap-2 flex-wrap">
+                        {% for res in mod.resources %}
+                          <a href="{{ res.url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 bg-[#F8FAFC] hover:bg-[#EFF6FF] border border-[#E2E8F0] hover:border-[#BFDBFE] px-2.5 py-1 rounded-lg text-xs transition-colors">
+                            <strong class="text-[#0056D2]">{{ res.platform }}:</strong>
+                            <span class="text-[#0F172A] font-medium">{{ res.name }}</span>
+                            <span class="text-[10px] text-[#64748B]">({{ res.type }})</span>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                          </a>
+                        {% endfor %}
+                      </div>
+                    </div>
+
+                    <!-- Hands-On Portfolio Project Card -->
+                    {% if mod.hands_on_project %}
+                      <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3 mb-3 text-xs">
+                        <div class="flex items-center gap-1.5 font-bold text-[#D97706] mb-1">
+                          <span>🛠️ Hands-On Project:</span>
+                          <span class="text-[#0F172A]">{{ mod.hands_on_project.title }}</span>
+                        </div>
+                        <p class="text-[#64748B] leading-relaxed">{{ mod.hands_on_project.description }}</p>
+                      </div>
+                    {% endif %}
+
+                    <!-- Footer: Lesson Modal Trigger + Toggle Module Complete Form -->
+                    <div class="flex items-center justify-between pt-3 border-t border-[#E2E8F0] gap-2 flex-wrap">
+                      <button type="button" onclick="openLessonModal('{{ mod.id }}', '{{ mod.title|replace('\'', '\\\'') }}', '{{ mod.hours }}', '{{ mod.completed }}')" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#0056D2] hover:text-[#00419E] bg-[#EFF6FF] hover:bg-[#DBEAFE] px-3 py-1.5 rounded-lg transition-colors">
+                        <span>📖 Interactive Lesson &amp; Hands-On Lab</span>
+                      </button>
+
+                      <form action="{{ url_for('toggle_module') }}" method="POST" onclick="event.stopPropagation()">
+                        <input type="hidden" name="career" value="{{ profile.career }}">
+                        <input type="hidden" name="module_id" value="{{ mod.id }}">
+                        {% if mod.completed %}
+                          <button type="submit" class="inline-flex items-center gap-1.5 bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0] text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>✓ Completed (Click to Toggle)</span>
+                          </button>
+                        {% else %}
+                          <button type="submit" class="inline-flex items-center gap-1.5 bg-white hover:bg-[#EFF6FF] text-[#0056D2] border border-[#CBD5E1] hover:border-[#0056D2] text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                            <span>○ Mark Module Complete (+250 XP)</span>
+                          </button>
+                        {% endif %}
+                      </form>
+                    </div>
+
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Multi-Agent Collaboration Feed, Leaderboard & Fast Judge Box (4 cols) -->
+    <div class="lg:col-span-4 space-y-6">
+
+      <!-- =========================================================================
+           4-Agent Collaboration Feed (Right Sidebar)
+           ========================================================================= -->
+      <section class="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm" id="agent-collaboration-feed">
+        <div class="border-b border-[#E2E8F0] pb-3 mb-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-ping"></span>
+              <h3 class="font-extrabold text-sm text-[#0F172A]">Live Agent Collaboration Feed</h3>
+            </div>
+            <span class="text-[10px] bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] px-2 py-0.5 rounded-full font-bold">4 Active</span>
+          </div>
+          <span class="text-[11px] text-[#64748B] block mt-0.5">Step-by-step agent-to-agent decisions in real time</span>
+        </div>
+
+        <!-- 4 Collaborating Agents Roster -->
+        <div class="space-y-1.5 mb-4">
+          <div class="flex items-center justify-between bg-[#F5F3FF] border-l-4 border-l-[#7C3AED] px-3 py-1.5 rounded-md text-xs">
+            <span class="font-bold text-[#0F172A]">Skill Analyzer Agent</span>
+            <span class="text-[10px] font-extrabold text-[#7C3AED] uppercase bg-white/70 px-1.5 py-0.5 rounded">Active</span>
+          </div>
+          <div class="flex items-center justify-between bg-[#F0F9FF] border-l-4 border-l-[#0284C7] px-3 py-1.5 rounded-md text-xs">
+            <span class="font-bold text-[#0F172A]">Career Matcher Agent</span>
+            <span class="text-[10px] font-extrabold text-[#0284C7] uppercase bg-white/70 px-1.5 py-0.5 rounded">Active</span>
+          </div>
+          <div class="flex items-center justify-between bg-[#FFFBEB] border-l-4 border-l-[#D97706] px-3 py-1.5 rounded-md text-xs">
+            <span class="font-bold text-[#0F172A]">Roadmap Architect</span>
+            <span class="text-[10px] font-extrabold text-[#D97706] uppercase bg-white/70 px-1.5 py-0.5 rounded">Active</span>
+          </div>
+          <div class="flex items-center justify-between bg-[#ECFDF5] border-l-4 border-l-[#059669] px-3 py-1.5 rounded-md text-xs">
+            <span class="font-bold text-[#0F172A]">Progress Evaluator &amp; AI Mentor Agent</span>
+            <span class="text-[10px] font-extrabold text-[#059669] uppercase bg-white/70 px-1.5 py-0.5 rounded">Active</span>
+          </div>
+        </div>
+
+        <!-- Agent Execution Timeline Cards -->
+        <div class="space-y-3.5 max-h-[500px] overflow-y-auto pr-1">
+          {% for log in plan.agent_logs %}
+            {% set lname = log.agent_name|lower %}
+            {% if 'skill' in lname or 'analyzer' in lname %}
+              {% set agent_display = 'Skill Analyzer Agent' %}
+              {% set agent_icon = '🟣' %}
+              {% set card_border = 'border-l-4 border-l-[#7C3AED]' %}
+              {% set callout_bg = 'bg-[#F5F3FF] border-[#DDD6FE]' %}
+            {% elif 'career' in lname or 'matcher' in lname %}
+              {% set agent_display = 'Career Matcher Agent' %}
+              {% set agent_icon = '🔵' %}
+              {% set card_border = 'border-l-4 border-l-[#0284C7]' %}
+              {% set callout_bg = 'bg-[#F0F9FF] border-[#BAE6FD]' %}
+            {% elif 'roadmap' in lname or 'recommender' in lname or 'architect' in lname %}
+              {% set agent_display = 'Roadmap & Resource Recommender Agent' %}
+              {% set agent_icon = '🟡' %}
+              {% set card_border = 'border-l-4 border-l-[#D97706]' %}
+              {% set callout_bg = 'bg-[#FFFBEB] border-[#FDE68A]' %}
+            {% else %}
+              {% set agent_display = 'Progress Evaluator & AI Mentor Agent' %}
+              {% set agent_icon = '🟢' %}
+              {% set card_border = 'border-l-4 border-l-[#059669]' %}
+              {% set callout_bg = 'bg-[#ECFDF5] border-[#A7F3D0]' %}
+            {% endif %}
+
+            <div class="bg-white border border-[#E2E8F0] {{ card_border }} rounded-xl p-3.5 shadow-sm text-xs">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-1.5 font-extrabold text-[#0F172A]">
+                  <span>{{ agent_icon }}</span>
+                  <span>{{ agent_display }}</span>
+                </div>
+                <span class="text-[10px] text-[#64748B] font-mono">{{ log.timestamp }}</span>
+              </div>
+
+              <!-- Plain-English Agent Decision Box -->
+              <div class="{{ callout_bg }} border rounded-lg p-2.5 mb-2">
+                <div class="text-[10.5px] font-bold text-[#0F172A] mb-0.5">Plain-English Decision:</div>
+                <p class="text-xs text-[#0F172A] font-medium leading-snug">{{ log.summary }}</p>
+              </div>
+
+              <!-- Collapsible Reasoning Trace -->
+              <details class="text-[11px] text-[#64748B]">
+                <summary class="cursor-pointer text-[#0056D2] font-semibold hover:underline">
+                  View Agent-to-Agent Reasoning Trace
+                </summary>
+                <div class="mt-2 p-2 bg-[#F8FAFC] rounded border border-[#E2E8F0] font-mono text-[10.5px] space-y-1">
+                  <div><strong>Action:</strong> <code>{{ log.action }}</code></div>
+                  <div><strong>Status:</strong> <code>{{ log.status }}</code></div>
+                  <div class="text-[#334155]">{{ log.details }}</div>
+                </div>
+              </details>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Cohort XP Leaderboard Card -->
+      <section class="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between border-b border-[#E2E8F0] pb-2 mb-3">
+          <h3 class="font-extrabold text-xs text-[#0F172A] uppercase tracking-wide flex items-center gap-1.5">
+            <span>🏆</span> Cohort XP Leaderboard
+          </h3>
+          <span class="text-[10px] bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A] px-2 py-0.5 rounded font-bold">Top Learners</span>
+        </div>
+
+        <div class="space-y-2">
+          {% for u in cohort_leaderboard %}
+            <div class="flex items-center justify-between text-xs p-2 rounded-lg {% if u.id == current_user.id or (not current_user.id and loop.first) %}bg-[#EFF6FF] border border-[#BFDBFE]{% else %}bg-[#F8FAFC]{% endif %}">
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full flex items-center justify-center font-extrabold text-[10px] {% if loop.index == 1 %}bg-[#F59E0B] text-white{% elif loop.index == 2 %}bg-[#94A3B8] text-white{% else %}bg-[#E2E8F0] text-[#64748B]{% endif %}">
+                  {{ loop.index }}
+                </span>
+                <div>
+                  <strong class="text-[#0F172A] block text-[11.5px] truncate max-w-[130px]">{{ u.name }}</strong>
+                  <span class="text-[10px] text-[#64748B]">{{ u.target_career }}</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <strong class="text-[#0056D2] font-black text-xs block">{{ u.xp or 750 }} XP</strong>
+                <span class="text-[10px] text-[#92400E] font-bold">🔥 {{ u.streak_days or 3 }}d</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Fast Judge Shortcuts Box -->
+      <section class="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
+        <div class="border-b border-[#E2E8F0] pb-2 mb-3">
+          <h3 class="font-extrabold text-xs text-[#0056D2] uppercase tracking-wide">⚡ Fast Judge Demonstrator</h3>
+          <p class="text-[11px] text-[#64748B] mt-0.5">Trigger real-time dynamic roadmap recalculation in 1 click.</p>
+        </div>
+
+        <div class="space-y-2">
+          <form action="{{ url_for('quick_assessment_demo') }}" method="POST">
+            <input type="hidden" name="mode" value="fail">
+            <input type="hidden" name="topic" value="JavaScript & Frontend Core">
+            <button type="submit" class="w-full text-xs font-bold text-[#B91C1C] bg-[#FEF2F2] hover:bg-[#FEE2E2] border border-[#FECACA] py-2 rounded-lg transition-colors text-center">
+              Trigger &lt;60% Score (Test Remediation)
+            </button>
+          </form>
+
+          <form action="{{ url_for('quick_assessment_demo') }}" method="POST">
+            <input type="hidden" name="mode" value="pass">
+            <input type="hidden" name="topic" value="JavaScript & Frontend Core">
+            <button type="submit" class="w-full text-xs font-bold text-[#065F46] bg-[#ECFDF5] hover:bg-[#D1FAE5] border border-[#A7F3D0] py-2 rounded-lg transition-colors text-center">
+              Trigger 100% Score (Test Mastery)
+            </button>
+          </form>
+        </div>
+      </section>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================================================
+     Interactive Lesson & Practice Modal (Feature 4)
+     ========================================================================= -->
+<div id="lessonModal" role="dialog" aria-modal="true" aria-labelledby="lessonModalTitle" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4" style="display:none;">
+  <div class="bg-white border border-[#E2E8F0] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 sm:p-8 space-y-6">
+    <div class="flex items-start justify-between border-b border-[#E2E8F0] pb-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full">INTERACTIVE DRILL</span>
+          <span id="lessonModalHours" class="text-xs text-[#64748B] font-semibold"></span>
+        </div>
+        <h3 id="lessonModalTitle" class="text-lg font-extrabold text-[#0F172A] leading-snug"></h3>
+      </div>
+      <button onclick="closeLessonModal()" class="text-[#64748B] hover:text-[#0F172A] text-xl font-bold p-1 leading-none">✕</button>
+    </div>
+
+    <!-- Core Concepts -->
+    <div class="space-y-2">
+      <h4 class="text-xs font-extrabold uppercase tracking-wide text-[#0F172A]">Core Conceptual Takeaways:</h4>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+        <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3">
+          <strong class="text-[#0056D2] block mb-1">1. Foundations</strong>
+          <span class="text-[#64748B]">Architectural execution model, memory layout, and scoping rules.</span>
+        </div>
+        <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3">
+          <strong class="text-[#10B981] block mb-1">2. Implementation</strong>
+          <span class="text-[#64748B]">Writing production-grade, maintainable code with unit test coverage.</span>
+        </div>
+        <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3">
+          <strong class="text-[#D97706] block mb-1">3. Trade-offs</strong>
+          <span class="text-[#64748B]">Throughput benchmarks, horizontal scaling, and latency bottlenecks.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hands-On Terminal Sandbox Drill -->
+    <div class="bg-[#0F172A] text-white rounded-xl p-4 font-mono text-xs space-y-2">
+      <div class="flex items-center justify-between text-[#94A3B8] border-b border-[#334155] pb-2 text-[11px]">
+        <span>terminal_sandbox &middot; interactive drill</span>
+        <span>bash</span>
+      </div>
+      <p class="text-[#38BDF8]">$ npm test -- --watchAll=false</p>
+      <p class="text-[#10B981]">✓ Test Suite Passed: 4/4 assertions verified</p>
+      <p class="text-[#94A3B8]">// Complete this module to record progress in SQLite and collect +250 XP.</p>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="flex items-center justify-between pt-4 border-t border-[#E2E8F0] flex-wrap gap-3">
+      <div class="flex items-center gap-3">
+        <button type="button" id="audioLessonBtn" onclick="toggleAudioLesson()" class="inline-flex items-center gap-1.5 bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#0056D2] border border-[#BFDBFE] px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-2xs">
+          <span id="audioLessonIcon">🔊</span>
+          <span id="audioLessonLabel">Listen to Lesson (Audio Mode)</span>
+        </button>
+        <span class="text-xs font-bold text-[#D97706] hidden sm:flex items-center gap-1">
+          <span>🏆</span>
+          <span>Awards +250 XP upon verification</span>
+        </span>
+      </div>
+
+      <form id="lessonModalForm" action="{{ url_for('toggle_module') }}" method="POST">
+        <input type="hidden" name="career" value="{{ profile.career }}">
+        <input type="hidden" id="lessonModalModuleId" name="module_id" value="">
+        <button type="submit" class="bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold px-5 py-2.5 rounded-lg shadow-sm transition-all hover:scale-102">
+          Complete Module (+250 XP) &rarr;
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================================
+     Live 4-Agent Execution Visualizer Modal (Feature 3)
+     ========================================================================= -->
+<div id="agentVisualizerModal" role="dialog" aria-modal="true" aria-labelledby="agentVisualizerTitle" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4" style="display:none;">
+  <div class="bg-white border border-[#E2E8F0] rounded-2xl max-w-xl w-full shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+    <div class="flex items-start justify-between border-b border-[#E2E8F0] pb-3">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-ping"></span>
+        <h3 id="agentVisualizerTitle" class="text-base font-extrabold text-[#0F172A]">Live 4-Agent Deep Analysis &amp; Reasoning Visualizer</h3>
+      </div>
+      <button onclick="closeAgentVisualizer()" class="text-[#64748B] hover:text-[#0F172A] text-lg font-bold">✕</button>
+    </div>
+
+    <!-- 4 Animated Agent Step Cards -->
+    <div class="space-y-3" id="agentTimelineSteps">
+      <!-- Step 1: Skill Analyzer -->
+      <div id="step1" class="border rounded-xl p-3 flex items-center justify-between text-xs border-[#E2E8F0] bg-[#F8FAFC] transition-all">
+        <div class="flex items-center gap-3">
+          <span class="text-lg">🟣</span>
+          <div>
+            <strong class="text-[#0F172A] block font-bold">1. Skill Analyzer Agent</strong>
+            <span class="text-[#64748B] text-[11px]" id="step1Text">Standby...</span>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#64748B] border border-[#E2E8F0]" id="step1Badge">Waiting</span>
+      </div>
+
+      <!-- Step 2: Career Matcher -->
+      <div id="step2" class="border rounded-xl p-3 flex items-center justify-between text-xs border-[#E2E8F0] bg-[#F8FAFC] transition-all">
+        <div class="flex items-center gap-3">
+          <span class="text-lg">🔵</span>
+          <div>
+            <strong class="text-[#0F172A] block font-bold">2. Career Matcher Agent</strong>
+            <span class="text-[#64748B] text-[11px]" id="step2Text">Standby...</span>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#64748B] border border-[#E2E8F0]" id="step2Badge">Waiting</span>
+      </div>
+
+      <!-- Step 3: Roadmap Architect -->
+      <div id="step3" class="border rounded-xl p-3 flex items-center justify-between text-xs border-[#E2E8F0] bg-[#F8FAFC] transition-all">
+        <div class="flex items-center gap-3">
+          <span class="text-lg">🟡</span>
+          <div>
+            <strong class="text-[#0F172A] block font-bold">3. Roadmap Architect Agent</strong>
+            <span class="text-[#64748B] text-[11px]" id="step3Text">Standby...</span>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#64748B] border border-[#E2E8F0]" id="step3Badge">Waiting</span>
+      </div>
+
+      <!-- Step 4: AI Mentor -->
+      <div id="step4" class="border rounded-xl p-3 flex items-center justify-between text-xs border-[#E2E8F0] bg-[#F8FAFC] transition-all">
+        <div class="flex items-center gap-3">
+          <span class="text-lg">🟢</span>
+          <div>
+            <strong class="text-[#0F172A] block font-bold">4. AI Mentor Agent</strong>
+            <span class="text-[#64748B] text-[11px]" id="step4Text">Standby...</span>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#64748B] border border-[#E2E8F0]" id="step4Badge">Waiting</span>
+      </div>
+    </div>
+
+    <!-- Live Reasoning Terminal Console -->
+    <div class="pt-2">
+      <div class="flex items-center justify-between mb-1.5">
+        <span class="text-[10.5px] font-extrabold uppercase tracking-wider text-[#475569] flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
+          Live Reasoning Logs
+        </span>
+        <span class="text-[10px] text-[#64748B] font-mono">SQLite Real-Time Telemetry</span>
+      </div>
+      <div id="liveReasoningConsole" class="bg-[#0B132B] text-[#E2E8F0] font-mono text-[11px] p-3 rounded-xl max-h-36 overflow-y-auto space-y-1 border border-[#1E293B] shadow-inner leading-relaxed">
+        <div class="text-[#94A3B8] italic">&gt; 4-Agent orchestrator ready. Click below to begin live analysis...</div>
+      </div>
+    </div>
+
+    <div class="pt-3 border-t border-[#E2E8F0] flex items-center justify-between">
+      <span class="text-xs text-[#64748B]" id="visualizerStatus">Ready to orchestrate multi-agent loop...</span>
+      <button type="button" id="startSimBtn" onclick="runAgentVisualizerLoop()" class="bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition-all hover:scale-102">
+        Start Live Orchestration &rarr;
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Interactive Assessment Modal -->
+<div id="assessmentModal" role="dialog" aria-modal="true" aria-labelledby="assessmentModalTitle" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4" style="display:none;">
+  <div class="bg-white border border-[#E2E8F0] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6">
+    <div class="flex items-start justify-between border-b border-[#E2E8F0] pb-3 mb-4">
+      <div>
+        <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#0056D2]">DIAGNOSTIC TEST</span>
+        <h3 id="assessmentModalTitle" class="text-lg font-extrabold text-[#0F172A]">Interactive Skill Assessment</h3>
+      </div>
+      <button onclick="closeAssessmentModal()" class="text-[#64748B] hover:text-[#0F172A] text-xl font-bold p-1 leading-none">✕</button>
+    </div>
+
+    <div class="mb-4 text-xs text-[#64748B]">
+      Complete this 5-question test in <strong>JavaScript &amp; Frontend Core</strong>.
+      Scoring under 60% automatically activates adaptive curriculum remediation.
+    </div>
+
+    <form action="{{ url_for('assessment') }}" method="POST" class="space-y-4">
+      <input type="hidden" name="topic" value="JavaScript & Frontend Core">
+
+      {% for q in quiz_banks['JavaScript & Frontend Core'] %}
+        <fieldset class="border border-[#E2E8F0] rounded-xl p-4 bg-[#FAFBFD]">
+          <legend class="text-xs font-bold text-[#0F172A] px-1">{{ loop.index }}. {{ q.question }}</legend>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+            {% for opt in q.options %}
+              <label class="flex items-center gap-2.5 bg-white border border-[#CBD5E1] rounded-lg p-2.5 text-xs cursor-pointer hover:border-[#0056D2] hover:bg-[#EFF6FF] transition-all">
+                <input type="radio" name="q{{ loop.index }}" value="{{ opt[0] }}" required class="text-[#0056D2]">
+                <span class="w-5 h-5 rounded-full bg-[#F1F5F9] font-bold flex items-center justify-center text-[10.5px] shrink-0">{{ opt[0]|upper }}</span>
+                <span class="text-[#0F172A]">{{ opt[1] }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+      {% endfor %}
+
+      <div class="flex items-center justify-end gap-3 pt-3 border-t border-[#E2E8F0]">
+        <button type="button" class="text-xs font-semibold text-[#64748B] hover:text-[#0F172A] px-3 py-2" onclick="closeAssessmentModal()">Cancel</button>
+        <button type="submit" class="bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition-all">
+          Submit Assessment to Progress Evaluator
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openAssessmentModal() {
+    document.getElementById('assessmentModal').style.display = 'flex';
+  }
+  function closeAssessmentModal() {
+    document.getElementById('assessmentModal').style.display = 'none';
+  }
+
+  let isReadingAudio = false;
+
+  function toggleAudioLesson() {
+    if (!('speechSynthesis' in window)) {
+      alert("Browser speech synthesis audio is not supported in this browser.");
+      return;
+    }
+    if (isReadingAudio) {
+      window.speechSynthesis.cancel();
+      isReadingAudio = false;
+      document.getElementById('audioLessonIcon').innerText = '🔊';
+      document.getElementById('audioLessonLabel').innerText = 'Listen to Lesson (Audio Mode)';
+      return;
+    }
+    const title = document.getElementById('lessonModalTitle').innerText;
+    const fullText = `Lesson overview: ${title}. Core conceptual takeaways: Foundations, implementation best practices, and horizontal scaling trade-offs. Practical terminal lab task: Run automated test suite assertions and verify pass state.`;
+
+    const utterance = new SpeechSynthesisUtterance(fullText);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.onend = function() {
+      isReadingAudio = false;
+      document.getElementById('audioLessonIcon').innerText = '🔊';
+      document.getElementById('audioLessonLabel').innerText = 'Listen to Lesson (Audio Mode)';
+    };
+    utterance.onerror = function() {
+      isReadingAudio = false;
+      document.getElementById('audioLessonIcon').innerText = '🔊';
+      document.getElementById('audioLessonLabel').innerText = 'Listen to Lesson (Audio Mode)';
+    };
+    window.speechSynthesis.speak(utterance);
+    isReadingAudio = true;
+    document.getElementById('audioLessonIcon').innerText = '⏹️';
+    document.getElementById('audioLessonLabel').innerText = 'Stop Audio';
+  }
+
+  function openLessonModal(modId, modTitle, modHours, isCompleted) {
+    document.getElementById('lessonModalModuleId').value = modId;
+    document.getElementById('lessonModalTitle').innerText = modTitle;
+    document.getElementById('lessonModalHours').innerText = "⏱️ " + modHours;
+    document.getElementById('lessonModal').style.display = 'flex';
+  }
+
+  function closeLessonModal() {
+    if (isReadingAudio && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      isReadingAudio = false;
+      const icon = document.getElementById('audioLessonIcon');
+      const label = document.getElementById('audioLessonLabel');
+      if (icon) icon.innerText = '🔊';
+      if (label) label.innerText = 'Listen to Lesson (Audio Mode)';
+    }
+    document.getElementById('lessonModal').style.display = 'none';
+  }
+
+  function runJdMatchAnalysis() {
+    const text = document.getElementById('jdInputText').value.trim();
+    if (!text) {
+      alert("Please paste a job description or list of requirements to analyze.");
+      return;
+    }
+    const btn = document.getElementById('jdAnalyzeBtn');
+    btn.innerHTML = '<span>⏳ Analyzing Stack...</span>';
+    btn.disabled = true;
+
+    fetch("{{ url_for('match_job_description') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ jd_text: text })
+    })
+    .then(r => r.json())
+    .then(data => {
+      btn.innerHTML = '<span>🎯 Analyze JD Match %</span>';
+      btn.disabled = false;
+      if (data.status === 'success') {
+        const res = data.analysis;
+        document.getElementById('jdResultsContainer').style.display = 'block';
+        document.getElementById('jdMatchPctText').innerText = res.match_pct + '%';
+        document.getElementById('jdDetectedRoleTitle').innerText = 'Target Role: ' + res.detected_role;
+        document.getElementById('jdMatchSubtitle').innerText = `${res.matched_skills.length} matched / ${res.jd_skills.length} required skills identified`;
+        
+        const badge = document.getElementById('jdMatchBadge');
+        if (res.match_pct >= 75) {
+          badge.className = 'text-xs font-extrabold px-3 py-1 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]';
+          badge.innerText = 'High Match Rate';
+        } else if (res.match_pct >= 50) {
+          badge.className = 'text-xs font-extrabold px-3 py-1 rounded-full bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]';
+          badge.innerText = 'Moderate Match';
+        } else {
+          badge.className = 'text-xs font-extrabold px-3 py-1 rounded-full bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]';
+          badge.innerText = 'Needs Skill Acceleration';
+        }
+
+        const matchedBox = document.getElementById('jdMatchedSkillsList');
+        matchedBox.innerHTML = '';
+        if (res.matched_skills.length === 0) {
+          matchedBox.innerHTML = '<span class="text-[#64748B] italic">No direct matches identified yet</span>';
+        } else {
+          res.matched_skills.forEach(s => {
+            matchedBox.innerHTML += `<span class="bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] px-2.5 py-1 rounded-md text-xs font-bold">✓ ${s}</span>`;
+          });
+        }
+
+        const missingBox = document.getElementById('jdMissingSkillsList');
+        missingBox.innerHTML = '';
+        if (res.missing_skills.length === 0) {
+          missingBox.innerHTML = '<span class="text-[#059669] font-bold">No missing skill gaps detected! Fully qualified.</span>';
+        } else {
+          res.missing_skills.forEach(s => {
+            missingBox.innerHTML += `<span class="bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA] px-2.5 py-1 rounded-md text-xs font-bold">✗ ${s}</span>`;
+          });
+        }
+
+        document.getElementById('jdMentorRecommendationText').innerText = res.recommendation;
+      }
+    })
+    .catch(err => {
+      btn.innerHTML = '<span>🎯 Analyze JD Match %</span>';
+      btn.disabled = false;
+      alert("Error analyzing job description. Please try again.");
+    });
+  }
+
+  const SAMPLE_JDS = {
+    fullstack: "Senior Full Stack Engineer: Seeking a developer experienced in React, Node.js, TypeScript, SQL, Docker, HTML/CSS, Git, and REST APIs. Experience building scalable client-server applications is required.",
+    ai: "AI & Machine Learning Engineer: Seeking an engineer with Python, PyTorch, LangChain, Transformers, Vector DBs, SQL, and Docker. Experience fine-tuning LLMs and developing RAG architectures is required.",
+    devops: "DevOps & Cloud Engineer: Looking for an engineer skilled in Linux, Docker, Kubernetes, AWS, Terraform, CI/CD, and Python scripting. Experience managing high-availability microservices is required."
+  };
+
+  function loadSampleJd(type) {
+    const text = SAMPLE_JDS[type] || "";
+    document.getElementById('jdInputText').value = text;
+  }
+
+  function startLiveAgentVisualizer() {
+    const modal = document.getElementById('agentVisualizerModal');
+    modal.style.display = 'flex';
+    runAgentVisualizerLoop();
+  }
+
+  function closeAgentVisualizer() {
+    document.getElementById('agentVisualizerModal').style.display = 'none';
+  }
+
+  function appendReasoningLog(agentName, message, colorClass) {
+    const consoleBox = document.getElementById('liveReasoningConsole');
+    if (!consoleBox) return;
+    const now = new Date();
+    const timeStr = now.toTimeString().split(' ')[0];
+    const logItem = document.createElement('div');
+    logItem.className = 'flex items-start gap-1.5 leading-snug';
+    logItem.innerHTML = `<span class="text-[#64748B] shrink-0">[${timeStr}]</span> <span class="${colorClass || 'text-white'} font-bold shrink-0">[${agentName}]</span> <span class="text-[#E2E8F0]">${message}</span>`;
+    consoleBox.appendChild(logItem);
+    consoleBox.scrollTop = consoleBox.scrollHeight;
+  }
+
+  function runAgentVisualizerLoop() {
+    const btn = document.getElementById('startSimBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>⟳ Orchestrating 4 Agents...</span>';
+    }
+
+    const consoleBox = document.getElementById('liveReasoningConsole');
+    if (consoleBox) {
+      consoleBox.innerHTML = '';
+    }
+
+    const s1 = document.getElementById('step1');
+    const s1t = document.getElementById('step1Text');
+    const s1b = document.getElementById('step1Badge');
+
+    const s2 = document.getElementById('step2');
+    const s2t = document.getElementById('step2Text');
+    const s2b = document.getElementById('step2Badge');
+
+    const s3 = document.getElementById('step3');
+    const s3t = document.getElementById('step3Text');
+    const s3b = document.getElementById('step3Badge');
+
+    const s4 = document.getElementById('step4');
+    const s4t = document.getElementById('step4Text');
+    const s4b = document.getElementById('step4Badge');
+
+    // Reset steps
+    [s1, s2, s3, s4].forEach(el => {
+      if (el) el.className = "border rounded-xl p-3 flex items-center justify-between text-xs border-[#E2E8F0] bg-[#F8FAFC] transition-all";
+    });
+    if (s1b) { s1b.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#64748B] border border-[#E2E8F0]"; s1b.innerText = "Waiting"; }
+    if (s2b) { s2b.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#64748B] border border-[#E2E8F0]"; s2b.innerText = "Waiting"; }
+    if (s3b) { s3b.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#64748B] border border-[#E2E8F0]"; s3b.innerText = "Waiting"; }
+    if (s4b) { s4b.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#64748B] border border-[#E2E8F0]"; s4b.innerText = "Waiting"; }
+
+    appendReasoningLog("System", "Invoking 4-Agent deep analysis pipeline via /api/run-agents...", "text-blue-400");
+    document.getElementById('visualizerStatus').innerText = "Connecting to 4-Agent pipeline API...";
+
+    fetch("{{ url_for('run_agents_live') }}", { method: "POST" })
+      .then(r => r.json())
+      .then(data => {
+        const steps = data.agent_steps || [];
+        const stepMap = {};
+        steps.forEach(st => {
+          stepMap[st.agent_name] = st;
+        });
+
+        const analyzerLog = stepMap["Skill Analyzer Agent"] || steps[0] || {};
+        const matcherLog = stepMap["Career Matcher Agent"] || steps[1] || {};
+        const mentorLog = stepMap["Progress Evaluator & AI Mentor Agent"] || steps[2] || {};
+        const roadmapLog = stepMap["Roadmap & Resource Recommender Agent"] || steps[3] || {};
+
+        // Phase 1: Skill Analyzer Agent
+        s1.className = "border-2 border-[#7C3AED] bg-[#F5F3FF] rounded-xl p-3 flex items-center justify-between text-xs shadow-sm transition-all";
+        s1t.innerText = "Auditing existing competencies and isolating missing skill gaps...";
+        s1b.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-[#7C3AED] text-white animate-pulse";
+        s1b.innerText = "● Analyzing";
+        appendReasoningLog("Skill Analyzer", "Auditing verified competencies against target career profile...", "text-purple-400");
+
+        setTimeout(() => {
+          s1b.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-[#10B981] text-white";
+          s1b.innerText = "✓ Validated";
+          s1t.innerText = analyzerLog.summary || "Identified strengths and isolated missing skill gaps.";
+          appendReasoningLog("Skill Analyzer", analyzerLog.summary || "Identified verified strengths and priority gaps.", "text-purple-300");
+          if (analyzerLog.details) appendReasoningLog("Skill Analyzer", analyzerLog.details.substring(0, 110) + "...", "text-[#CBD5E1]");
+
+          // Phase 2: Career Matcher Agent
+          s2.className = "border-2 border-[#0284C7] bg-[#F0F9FF] rounded-xl p-3 flex items-center justify-between text-xs shadow-sm transition-all";
+          s2t.innerText = "Benchmarking readiness % across high-demand industry profiles...";
+          s2b.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-[#0284C7] text-white animate-pulse";
+          s2b.innerText = "● Benchmarking";
+          appendReasoningLog("Career Matcher", "Benchmarking role readiness across 5 tech tracks in SQLite...", "text-sky-400");
+
+          setTimeout(() => {
+            s2b.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-[#10B981] text-white";
+            s2b.innerText = "✓ Matched";
+            s2t.innerText = matcherLog.summary || `Calculated role readiness at ${data.target_readiness_pct}%.`;
+            appendReasoningLog("Career Matcher", matcherLog.summary || `Readiness score computed: ${data.target_readiness_pct}%.`, "text-sky-300");
+
+            // Phase 3: Roadmap Architect Agent
+            s3.className = "border-2 border-[#D97706] bg-[#FFFBEB] rounded-xl p-3 flex items-center justify-between text-xs shadow-sm transition-all";
+            s3t.innerText = "Synthesizing sequential milestone path and remedial checks...";
+            s3b.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-[#D97706] text-white animate-pulse";
+            s3b.innerText = "● Synthesizing";
+            appendReasoningLog("Roadmap Architect", "Synthesizing sequential milestone path with curated Coursera resources...", "text-amber-400");
+
+            setTimeout(() => {
+              s3b.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-[#10B981] text-white";
+              s3b.innerText = "✓ Synthesized";
+              s3t.innerText = roadmapLog.summary || "Generated phased curriculum with verified modules.";
+              appendReasoningLog("Roadmap Architect", roadmapLog.summary || "Generated customized milestone roadmap.", "text-amber-300");
+
+              // Phase 4: AI Mentor Agent
+              s4.className = "border-2 border-[#10B981] bg-[#ECFDF5] rounded-xl p-3 flex items-center justify-between text-xs shadow-sm transition-all";
+              s4t.innerText = "Continuous diagnostic monitoring active on 60% mastery threshold...";
+              s4b.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-[#10B981] text-white animate-pulse";
+              s4b.innerText = "● Monitoring";
+              appendReasoningLog("AI Mentor", "Synchronizing dynamic evaluation benchmarks and telemetry...", "text-emerald-400");
+
+              setTimeout(() => {
+                s4b.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-[#10B981] text-white";
+                s4b.innerText = "✓ Active";
+                s4t.innerText = mentorLog.summary || "Continuous diagnostic monitoring initialized and standing by.";
+                appendReasoningLog("AI Mentor", mentorLog.summary || "Evaluation monitor active; remediation ready.", "text-emerald-300");
+                appendReasoningLog("System", "✓ 4-Agent deep analysis completed and persisted to SQLite.", "text-green-400");
+
+                document.getElementById('visualizerStatus').innerText = "✓ 4-Agent deep analysis complete! Reloading updated telemetry...";
+                if (btn) {
+                  btn.innerHTML = '<span>✓ Complete (Reloading...)</span>';
+                }
+
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1100);
+              }, 600);
+            }, 600);
+          }, 600);
+        }, 600);
+      })
+      .catch(err => {
+        appendReasoningLog("System", "Error orchestrating agents: " + err, "text-red-400");
+        document.getElementById('visualizerStatus').innerText = "Error executing multi-agent pipeline.";
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "Retry Live Orchestration";
+        }
+      });
+  }
+
+  window.onclick = function(event) {
+    const aModal = document.getElementById('assessmentModal');
+    const lModal = document.getElementById('lessonModal');
+    const vModal = document.getElementById('agentVisualizerModal');
+    if (event.target == aModal) aModal.style.display = "none";
+    if (event.target == lModal) lModal.style.display = "none";
+    if (event.target == vModal) vModal.style.display = "none";
+  }
+</script>
+{% endblock %}

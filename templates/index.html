@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}SkillPath AI — Adaptive Career & Skill-Gap Intelligence · Profile Setup{% endblock %}
+
+{% block extra_head %}
+<!-- Tailwind CSS CDN directly in head -->
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page-shell max-w-4xl mx-auto space-y-6">
+
+  <!-- Coursera Hero Header -->
+  <header class="bg-white border border-[#E2E8F0] rounded-2xl p-6 lg:p-8 shadow-sm text-center">
+    <div class="inline-flex items-center gap-2 bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
+      <span>✦</span> Multi-Agent AI Career Orchestration
+    </div>
+    <h1 class="text-3xl font-extrabold text-[#0F172A] tracking-tight mb-2">
+      Engineer Your Next <span class="text-[#0056D2]">Tech Career</span>
+    </h1>
+    <p class="text-xs sm:text-sm text-[#64748B] max-w-2xl mx-auto leading-relaxed mb-6">
+      Input your current competencies, certifications, and target role. Our four collaborating agents
+      benchmark your skills against industry standards, identify critical gaps, and synthesize a dynamic,
+      phased milestone roadmap.
+    </p>
+
+    <!-- Smart Resume / Bio Auto-Extractor Card -->
+    <div class="bg-[#EFF6FF] border border-[#BFDBFE] rounded-2xl p-6 text-left shadow-xs">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📄</span>
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#0056D2]">Smart Resume &amp; Bio Auto-Extractor</h3>
+        </div>
+        <span class="text-[10px] font-bold text-[#0056D2] bg-white border border-[#BFDBFE] px-2.5 py-0.5 rounded-full">Zero-Demo Heuristic NLP</span>
+      </div>
+      <p class="text-xs text-[#334155] leading-relaxed mb-3">
+        Skip manual entry: paste your resume, LinkedIn summary, or technical background paragraph below. Our parser automatically extracts canonical skills, determines your target career, and commands the 4 agents to synthesize your roadmap.
+      </p>
+      
+      <form action="{{ url_for('extract_resume') }}" method="POST" class="space-y-3">
+        <label for="indexResumeText" class="sr-only">Paste your resume or bio here</label>
+        <textarea id="indexResumeText" name="resume_text" rows="3" required placeholder="Paste your resume or bio here (e.g. 'Software Engineer with experience in Python, SQL, Docker, React, and building RESTful APIs with PostgreSQL')..." class="w-full text-xs p-3.5 border border-[#CBD5E1] rounded-xl focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 bg-white leading-relaxed resize-none"></textarea>
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <span class="text-[11px] text-[#64748B]">Detects 60+ programming languages, frameworks, cloud stacks &amp; databases</span>
+          <button type="submit" class="bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-5 py-2.5 rounded-lg shadow-sm transition-all hover:scale-102">
+            Auto-Extract Skills &amp; Launch Custom Roadmap →
+          </button>
+        </div>
+      </form>
+    </div>
+  </header>
+
+  <!-- Profile Form Elevated Card -->
+  <div class="bg-white border border-[#E2E8F0] rounded-2xl p-6 lg:p-8 shadow-sm">
+    <div class="flex items-start justify-between border-b border-[#E2E8F0] pb-3 mb-6">
+      <div>
+        <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#0056D2]">MANUAL PROFILE BUILDER</span>
+        <h2 class="text-lg font-extrabold text-[#0F172A]">Or Enter Your Qualifications Manually</h2>
+      </div>
+      <div class="inline-flex items-center gap-1.5 bg-[#F5F3FF] text-[#7C3AED] border border-[#DDD6FE] px-3 py-1 rounded-full text-xs font-bold">
+        <span class="w-2 h-2 rounded-full bg-[#7C3AED]"></span>
+        <span>Skill Analyzer Agent</span>
+      </div>
+    </div>
+
+    <form action="{{ url_for('index') }}" method="POST" class="space-y-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-[#0F172A] mb-1" for="nameInput">Full Name / Learner Handle <span class="text-[#EF4444]">*</span></label>
+          <input type="text" id="nameInput" name="name" required
+                 value="{{ profile.name if profile else '' }}"
+                 placeholder="e.g. Jordan Lee"
+                 class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2]">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-[#0F172A] mb-1" for="eduInput">Education &amp; Background</label>
+          <input type="text" id="eduInput" name="education"
+                 value="{{ profile.education if profile else 'B.S. in Computer Science / Self-Taught' }}"
+                 placeholder="e.g. B.S. in Computer Science"
+                 class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2]">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-[#0F172A] mb-1" for="skillsInput">
+            Existing Skills &amp; Proficiencies <span class="text-[#EF4444]">*</span>
+            <small class="text-[#64748B] font-normal block">Comma-separated (e.g. Python, SQL, basic HTML)</small>
+          </label>
+          <input type="text" id="skillsInput" name="skills" required
+                 value="{{ profile.skills if profile else 'Python, SQL, basic HTML' }}"
+                 placeholder="Python, SQL, basic HTML"
+                 class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] font-mono">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-[#0F172A] mb-1" for="careerSelect">Target Career Role <span class="text-[#EF4444]">*</span></label>
+          <select id="careerSelect" name="career" required class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] bg-white">
+            {% for role in available_roles %}
+              <option value="{{ role }}" {% if profile and profile.career == role %}selected{% elif not profile and role == 'Full Stack Developer' %}selected{% endif %}>
+                {{ role }}
+              </option>
+            {% endfor %}
+          </select>
+          <span class="text-[10px] text-[#64748B] block mt-1">Switching role triggers real-time skill-gap recalculation across all 4 agents</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-[#0F172A] mb-1" for="expSelect">Experience Level</label>
+          <select id="expSelect" name="experience_level" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] bg-white">
+            <option value="Junior Developer" {% if profile and profile.experience_level == 'Junior Developer' %}selected{% endif %}>Junior Developer (0-2 years)</option>
+            <option value="Self-Taught / Career Switcher" {% if profile and profile.experience_level == 'Self-Taught / Career Switcher' %}selected{% endif %}>Self-Taught / Career Switcher</option>
+            <option value="Mid-Level Engineer" {% if profile and profile.experience_level == 'Mid-Level Engineer' %}selected{% endif %}>Mid-Level Engineer (2-5 years)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-[#0F172A] mb-1" for="certsInput">
+            Certifications (Optional)
+            <small class="text-[#64748B] font-normal block">Validates domain proficiency</small>
+          </label>
+          <input type="text" id="certsInput" name="certifications"
+                 value="{{ profile.certifications if profile else 'Python Institute PCAP, Google Data Analytics' }}"
+                 placeholder="e.g. AWS Certified Developer, Meta Frontend"
+                 class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2]">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-[#0F172A] mb-1" for="projInput">
+          Key Projects &amp; Real-World Code (Optional)
+          <small class="text-[#64748B] font-normal block">Provides evidence for skill scoring</small>
+        </label>
+        <textarea id="projInput" name="projects" rows="2"
+                  placeholder="e.g. Inventory CLI Tool (Python), Sales Reporting Dashboard (SQL), Static Resume Website (HTML)"
+                  class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2]">{{ profile.projects if profile else 'Inventory CLI Tool (Python), Sales Reporting Dashboard (SQL), Static Resume Website (HTML)' }}</textarea>
+      </div>
+
+      <div class="flex items-center justify-end pt-3 border-t border-[#E2E8F0]">
+        <button type="submit" class="bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-6 py-2.5 rounded-lg shadow-sm transition-all hover:-translate-y-0.5">
+          Run Multi-Agent Skill Analysis →
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

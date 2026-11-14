@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SkillPath AI — Autonomous Multi-Agent Adaptive Career & Skill-Gap Intelligence Platform.">
+  <title>{% block title %}SkillPath AI — Adaptive Career & Skill-Gap Intelligence{% endblock %}</title>
+  
+  <!-- Tailwind CSS CDN directly in head -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            coursera: {
+              blue: '#0056D2',
+              darkblue: '#00419E',
+              lightblue: '#EFF6FF',
+              emerald: '#10B981',
+              amber: '#F59E0B',
+              rose: '#EF4444',
+              bg: '#F8FAFC'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Modern EdTech Typography: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Clean Custom Coursera CSS System -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="coursera-theme bg-[#F8FAFC] text-[#0F172A] font-sans min-h-screen flex flex-col antialiased">
+  <!-- Skip to Main Content Link for Keyboard & Screen Reader Accessibility -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#0056D2] focus:text-white focus:rounded-lg focus:font-bold focus:shadow-lg">Skip to main content</a>
+  <div class="app-layout flex flex-col min-h-screen">
+    
+    <!-- Top Navigation Bar (100% Responsive with Mobile Drawer) -->
+    <header class="top-nav sticky top-0 z-50 bg-white border-b border-[#E2E8F0] shadow-sm px-4 lg:px-7 py-2.5 flex items-center justify-between gap-3">
+      
+      <!-- Left: Logo & Enterprise Badge + Mobile Menu Toggle -->
+      <div class="nav-left flex items-center gap-3 shrink-0">
+        <!-- Mobile Drawer Hamburger Button -->
+        <button type="button" onclick="toggleMobileDrawer()" class="lg:hidden p-2 text-[#334155] hover:text-[#0056D2] hover:bg-[#F1F5F9] rounded-lg focus:outline-none" aria-label="Open Navigation Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+
+        <a class="brand flex items-center gap-2.5 group" href="{{ url_for('dashboard') }}">
+          <div class="brand-logo-wrap w-9 h-9 bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+            <svg class="brand-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#0056D2" stroke="#0056D2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 17L12 22L22 17" stroke="#0056D2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 12L12 17L22 12" stroke="#0056D2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="brand-identity flex flex-col">
+            <div class="brand-title-row flex items-center gap-1.5">
+              <span class="brand-name text-base font-black text-[#0F172A] tracking-tight">SkillPath <span class="text-[#0056D2]">AI</span></span>
+              <span class="enterprise-badge text-[9.5px] font-extrabold uppercase tracking-wider bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full hidden sm:inline-block">Enterprise</span>
+            </div>
+            <span class="brand-tagline text-[11px] font-medium text-[#64748B] hidden md:inline-block">Adaptive Career Intelligence</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Center: Target Career Switcher (Desktop/Tablet) -->
+      <div class="nav-center hidden lg:flex items-center gap-3.5 flex-1 justify-center max-w-xl">
+        <!-- Target Career Selector -->
+        <div class="header-control-group flex flex-col items-start">
+          <form action="{{ url_for('switch_role') }}" method="POST" class="role-switcher-form" id="globalRoleForm">
+            <div class="switcher-box flex items-center bg-white border border-[#CBD5E1] rounded-lg px-2.5 py-1 shadow-xs hover:border-[#0056D2] focus-within:border-[#0056D2] focus-within:ring-2 focus-within:ring-[#0056D2]/20 transition-all">
+              <label class="switcher-label flex items-center gap-1.5 text-xs font-semibold text-[#64748B] mr-2 whitespace-nowrap" for="roleSelect">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Role:</span>
+              </label>
+              <div class="select-wrapper relative inline-flex items-center">
+                <select name="career" id="roleSelect" class="bg-transparent border-none text-xs font-bold text-[#0F172A] pr-5 outline-none cursor-pointer" onchange="document.getElementById('globalRoleForm').submit()">
+                  {% for role in available_roles %}
+                    <option value="{{ role }}" {% if current_profile and current_profile.career == role %}selected{% endif %}>
+                      {{ role }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <span class="select-arrow absolute right-0 pointer-events-none text-[#64748B]">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+              </div>
+            </div>
+          </form>
+          <span class="btn-helper-sub text-[10px] text-[#64748B] mt-0.5 truncate max-w-[210px]">Switch role to recalculate</span>
+        </div>
+      </div>
+
+      <!-- Right: Navigation Links, Gamified XP & User Avatar -->
+      <div class="nav-right flex items-center gap-2.5 shrink-0">
+        <!-- Desktop Nav Tabs -->
+        <nav class="nav-tabs hidden xl:flex items-center gap-1" aria-label="Main Navigation">
+          <a href="{{ url_for('dashboard') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'dashboard' %}text-[#0056D2] bg-[#EFF6FF] font-bold{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}">
+            <span>Dashboard</span>
+          </a>
+          <a href="{{ url_for('assessment') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint in ('assessment', 'assessments') %}text-[#0056D2] bg-[#EFF6FF] font-bold{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}">
+            <span>Assessments</span>
+          </a>
+          <a href="{{ url_for('mock_interview') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'mock_interview' %}text-[#0056D2] bg-[#EFF6FF] font-bold{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}">
+            <span class="text-xs">🎙️</span>
+            <span>AI Mock Interview</span>
+          </a>
+          <a href="{{ url_for('certificate') }}" class="nav-tab inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'certificate' %}text-[#059669] bg-[#ECFDF5] font-bold border border-[#A7F3D0]{% else %}text-[#059669] hover:bg-[#ECFDF5]{% endif %}">
+            <span>🎓 Certificate</span>
+          </a>
+          <a href="{{ url_for('mentor') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'mentor' %}text-[#0056D2] bg-[#EFF6FF] font-bold{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}">
+            <span>AI Mentor</span>
+          </a>
+          <a href="{{ url_for('admin_portal') }}" class="nav-tab inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'admin_portal' %}text-[#7C3AED] bg-[#F5F3FF] font-bold border border-[#DDD6FE]{% else %}text-[#7C3AED] hover:bg-[#F5F3FF]{% endif %}">
+            <span>Admin</span>
+          </a>
+        </nav>
+
+        <!-- Gamification Badge: XP & Streak -->
+        <div class="hidden sm:flex items-center gap-1.5 bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] px-2.5 py-1 rounded-lg text-xs font-extrabold shadow-2xs">
+          <span>🔥</span>
+          <span>{{ current_user.streak_days or 4 }}d Streak</span>
+          <span class="text-[#D97706] ml-1 bg-white/80 px-1.5 py-0.2 rounded border border-[#FDE68A]">{{ current_user.xp or 1250 }} XP</span>
+        </div>
+
+        <!-- User Profile Badge & Logout -->
+        <div class="user-profile-badge flex items-center gap-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-2 py-1">
+          <div class="avatar-circle w-7 h-7 rounded-full bg-[#0056D2] text-white flex items-center justify-center text-xs font-black shadow-xs shrink-0">
+            {{ current_user.avatar or 'SP' }}
+          </div>
+          <div class="user-meta hidden sm:flex flex-col text-left leading-tight">
+            <span class="text-xs font-bold text-[#0F172A] truncate max-w-[100px]">{{ current_user.name }}</span>
+            <span class="text-[9.5px] text-[#64748B] font-medium">{{ current_user.role or 'Learner' }}</span>
+          </div>
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('logout') }}" class="logout-btn ml-0.5 text-[#64748B] hover:text-[#EF4444] p-1 rounded transition-colors" title="Sign Out">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </a>
+          {% else %}
+            <a href="{{ url_for('login') }}" class="login-btn ml-0.5 text-xs font-bold text-[#0056D2] hover:underline px-1">
+              Sign In
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile Drawer Overlay & Sidebar (100% Mobile Responsive) -->
+    <div id="mobileDrawerOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 transition-opacity hidden" onclick="toggleMobileDrawer()"></div>
+    <div id="mobileDrawer" class="fixed top-0 left-0 bottom-0 w-72 bg-white z-50 shadow-2xl p-5 flex flex-col justify-between transform -translate-x-full transition-transform duration-300 ease-in-out lg:hidden">
+      <div>
+        <!-- Drawer Header -->
+        <div class="flex items-center justify-between pb-4 border-b border-[#E2E8F0] mb-4">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg flex items-center justify-center font-bold text-[#0056D2]">
+              SP
+            </div>
+            <span class="font-black text-base text-[#0F172A]">SkillPath <strong class="text-[#0056D2]">AI</strong></span>
+          </div>
+          <button onclick="toggleMobileDrawer()" class="p-1 text-[#64748B] hover:text-[#0F172A] text-lg font-bold">✕</button>
+        </div>
+
+        <!-- Mobile User Badge -->
+        <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3 mb-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-[#0056D2] text-white flex items-center justify-center text-sm font-bold shrink-0">
+            {{ current_user.avatar or 'SP' }}
+          </div>
+          <div>
+            <strong class="text-xs font-extrabold text-[#0F172A] block">{{ current_user.name }}</strong>
+            <span class="text-[10.5px] text-[#64748B] block">{{ current_user.email }}</span>
+            <div class="flex items-center gap-1.5 mt-1 text-[10px] font-bold text-[#92400E]">
+              <span>🔥 {{ current_user.streak_days or 4 }}d</span>
+              <span>&middot;</span>
+              <span>{{ current_user.xp or 1250 }} XP</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Navigation Links -->
+        <nav class="space-y-1.5 mb-6">
+          <a href="{{ url_for('dashboard') }}" class="flex items-center gap-2.5 text-xs font-bold px-3 py-2.5 rounded-lg {% if request.endpoint == 'dashboard' %}bg-[#EFF6FF] text-[#0056D2]{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}" onclick="toggleMobileDrawer()">
+            <span>📊</span>
+            <span>Dashboard</span>
+          </a>
+          <a href="{{ url_for('assessment') }}" class="flex items-center gap-2.5 text-xs font-bold px-3 py-2.5 rounded-lg {% if request.endpoint in ('assessment', 'assessments') %}bg-[#EFF6FF] text-[#0056D2]{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}" onclick="toggleMobileDrawer()">
+            <span>📋</span>
+            <span>Skill Assessments</span>
+          </a>
+          <a href="{{ url_for('mock_interview') }}" class="flex items-center gap-2.5 text-xs font-bold px-3 py-2.5 rounded-lg {% if request.endpoint == 'mock_interview' %}bg-[#EFF6FF] text-[#0056D2]{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}" onclick="toggleMobileDrawer()">
+            <span>🎙️</span>
+            <span>AI Mock Interview</span>
+          </a>
+          <a href="{{ url_for('certificate') }}" class="flex items-center gap-2.5 text-xs font-bold px-3 py-2.5 rounded-lg text-[#059669] hover:bg-[#ECFDF5]" onclick="toggleMobileDrawer()">
+            <span>🎓</span>
+            <span>Verified Certificate</span>
+          </a>
+          <a href="{{ url_for('mentor') }}" class="flex items-center gap-2.5 text-xs font-bold px-3 py-2.5 rounded-lg {% if request.endpoint == 'mentor' %}bg-[#EFF6FF] text-[#0056D2]{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}" onclick="toggleMobileDrawer()">
+            <span>🤖</span>
+            <span>AI Mentor</span>
+          </a>
+          <a href="{{ url_for('admin_portal') }}" class="flex items-center gap-2.5 text-xs font-bold px-3 py-2.5 rounded-lg text-[#7C3AED] hover:bg-[#F5F3FF]" onclick="toggleMobileDrawer()">
+            <span>⚙️</span>
+            <span>Admin Portal</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="pt-4 border-t border-[#E2E8F0]">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('logout') }}" class="w-full flex items-center justify-center gap-2 text-xs font-bold text-[#EF4444] hover:bg-[#FEF2F2] py-2 rounded-lg transition-colors">
+            <span>Sign Out</span>
+          </a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="w-full flex items-center justify-center gap-2 text-xs font-bold text-[#0056D2] hover:bg-[#EFF6FF] py-2 rounded-lg transition-colors">
+            <span>Sign In</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- 3-Step Architecture & Workflow Banner -->
+    <section class="workflow-banner bg-[#F0F7FF] border-b border-[#DBEAFE] px-4 lg:px-7 py-2">
+      <div class="workflow-banner-container max-w-[1380px] mx-auto flex items-center justify-between gap-3 flex-wrap">
+        <div class="workflow-badge flex items-center gap-1.5">
+          <span class="text-[#0056D2] text-sm">✦</span>
+          <span class="workflow-title-text text-xs font-bold text-[#0056D2] tracking-tight">SkillPath AI — Adaptive Career &amp; Skill-Gap Intelligence</span>
+        </div>
+        <div class="workflow-track flex items-center gap-2.5 text-[11px] font-semibold text-[#334155] overflow-x-auto">
+          <div class="workflow-node flex items-center gap-1 whitespace-nowrap">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#0056D2] text-white flex items-center justify-center text-[9px] font-black">1</span>
+            <span>Set Profile &amp; Role</span>
+          </div>
+          <span class="text-[#93C5FD]">→</span>
+          <div class="workflow-node flex items-center gap-1 whitespace-nowrap">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#0056D2] text-white flex items-center justify-center text-[9px] font-black">2</span>
+            <span>4 AI Agents Analyze Gaps</span>
+          </div>
+          <span class="text-[#93C5FD]">→</span>
+          <div class="workflow-node flex items-center gap-1 whitespace-nowrap">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#0056D2] text-white flex items-center justify-center text-[9px] font-black">3</span>
+            <span>Adaptive Roadmap &amp; Assessments</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Global Toast / Flash Notifications -->
+    <div class="flash-toast-container fixed top-16 right-4 lg:right-7 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="toast-card pointer-events-auto flex items-start gap-3 bg-white border border-[#E2E8F0] rounded-xl p-3.5 shadow-lg text-xs transition-all {% if category == 'remediation' or category == 'warning' %}border-l-4 border-l-[#F59E0B]{% elif category == 'success' %}border-l-4 border-l-[#10B981]{% else %}border-l-4 border-l-[#0056D2]{% endif %}">
+              <div class="toast-indicator shrink-0 mt-0.5">
+                {% if category == 'remediation' or category == 'warning' %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                {% elif category == 'success' %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                {% else %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0056D2" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                {% endif %}
+              </div>
+              <div class="toast-body flex-1 text-[#0F172A] leading-snug">
+                {{ message }}
+              </div>
+              <button class="toast-dismiss text-[#94A3B8] hover:text-[#0F172A] text-base font-bold px-1 leading-none" onclick="this.parentElement.remove()" aria-label="Close">×</button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <!-- Main Content Canvas -->
+    <main id="main-content" class="main-canvas flex-1 max-w-[1380px] w-full mx-auto px-4 lg:px-7 py-5">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Coursera-Grade Footer -->
+    <footer class="app-footer bg-white border-t border-[#E2E8F0] py-5 px-4 lg:px-7 mt-auto">
+      <div class="footer-container max-w-[1380px] mx-auto flex items-center justify-between gap-3 flex-wrap text-xs text-[#64748B]">
+        <div class="footer-left flex flex-col gap-0.5">
+          <div class="footer-logo flex items-center gap-2">
+            <span class="text-sm font-bold text-[#0F172A]">SkillPath <strong class="text-[#0056D2]">AI</strong></span>
+            <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded text-[10px] font-bold">PromptWars X RTC</span>
+          </div>
+          <p class="text-[11px]">SkillPath AI — Adaptive Career &amp; Skill-Gap Intelligence &middot; 4-Agent Orchestration Engine</p>
+        </div>
+        <div class="footer-right flex items-center gap-2 flex-wrap">
+          <span class="bg-[#F1F5F9] border border-[#E2E8F0] px-2.5 py-0.5 rounded-full font-medium text-[11px]">Python 3 + Flask</span>
+          <span class="bg-[#F1F5F9] border border-[#E2E8F0] px-2.5 py-0.5 rounded-full font-medium text-[11px]">SQLite Store</span>
+          <span class="bg-[#F1F5F9] border border-[#E2E8F0] px-2.5 py-0.5 rounded-full font-medium text-[11px]">100% Responsive</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function toggleMobileDrawer() {
+      const drawer = document.getElementById('mobileDrawer');
+      const overlay = document.getElementById('mobileDrawerOverlay');
+      if (drawer.classList.contains('-translate-x-full')) {
+        drawer.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+      } else {
+        drawer.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+      }
+    }
+  </script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

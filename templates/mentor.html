@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}SkillPath AI — Context-Aware AI Mentor Companion{% endblock %}
+
+{% block extra_head %}
+<!-- Tailwind CSS CDN directly in head -->
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block content %}
+<div class="mentor-shell max-w-5xl mx-auto space-y-6">
+
+  <!-- Header -->
+  <header class="bg-white border border-[#E2E8F0] rounded-2xl p-6 lg:p-8 shadow-sm">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="text-xs font-bold uppercase tracking-wider text-[#0056D2]">STRATEGIC ADVISORY</span>
+      <span class="inline-flex items-center gap-1.5 bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] px-2.5 py-0.5 rounded-full text-xs font-bold">
+        <span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
+        Context-Aware AI Mentor Agent
+      </span>
+    </div>
+    <h1 class="text-2xl lg:text-3xl font-extrabold text-[#0F172A] tracking-tight">Personal AI Mentor</h1>
+    <p class="text-xs text-[#64748B] mt-1 max-w-3xl leading-relaxed">
+      Your personalized AI mentor continuously ingests your profile competencies, assessment score history,
+      and roadmap milestones to provide precise, tactical learning guidance.
+    </p>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    
+    <!-- Main Chat Workspace (Linear Inspired - 8 cols) -->
+    <div class="lg:col-span-8 bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm flex flex-col min-h-[580px]">
+      
+      <!-- Mentor Chat Header -->
+      <div class="flex items-center justify-between border-b border-[#E2E8F0] pb-4 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] flex items-center justify-center text-xl shadow-sm">
+            🤖
+          </div>
+          <div>
+            <h3 class="font-extrabold text-sm text-[#0F172A]">SkillPath AI Mentor</h3>
+            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-[#059669]">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
+              Real-Time Agent Connected
+            </span>
+          </div>
+        </div>
+        <div>
+          <span class="text-xs bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-3 py-1 rounded-full font-bold">
+            Target Role: {{ profile.career }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Suggested Inquiry Chips -->
+      <div class="mb-5">
+        <span class="text-[11px] font-bold text-[#64748B] block mb-2">Suggested Inquiries:</span>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button type="button" class="text-xs font-semibold bg-[#F8FAFC] hover:bg-[#EFF6FF] text-[#334155] hover:text-[#0056D2] border border-[#E2E8F0] hover:border-[#BFDBFE] px-3 py-1.5 rounded-full transition-colors" onclick="fillPrompt('Why is JavaScript critical before tackling React and Node.js?')">
+            Why learn JS before React?
+          </button>
+          <button type="button" class="text-xs font-semibold bg-[#F8FAFC] hover:bg-[#EFF6FF] text-[#334155] hover:text-[#0056D2] border border-[#E2E8F0] hover:border-[#BFDBFE] px-3 py-1.5 rounded-full transition-colors" onclick="fillPrompt('How do I recover from a score below 60% on my assessment?')">
+            How to recover from &lt;60% score?
+          </button>
+          <button type="button" class="text-xs font-semibold bg-[#F8FAFC] hover:bg-[#EFF6FF] text-[#334155] hover:text-[#0056D2] border border-[#E2E8F0] hover:border-[#BFDBFE] px-3 py-1.5 rounded-full transition-colors" onclick="fillPrompt('How do my existing Python and SQL skills transfer to Full Stack development?')">
+            How does Python transfer to Full Stack?
+          </button>
+          <button type="button" class="text-xs font-semibold bg-[#F8FAFC] hover:bg-[#EFF6FF] text-[#334155] hover:text-[#0056D2] border border-[#E2E8F0] hover:border-[#BFDBFE] px-3 py-1.5 rounded-full transition-colors" onclick="fillPrompt('What first hands-on portfolio project will get me hired as a Full Stack Developer?')">
+            Best first portfolio project?
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat Thread Area -->
+      <div class="flex-1 space-y-4 mb-5">
+        {% if reply_data %}
+          {% if user_question %}
+            <div class="flex justify-end">
+              <div class="bg-[#0056D2] text-white rounded-2xl rounded-tr-sm p-4 max-w-[85%] text-xs leading-relaxed shadow-sm">
+                <span class="font-bold block text-[10px] text-blue-200 mb-1">You</span>
+                <p>{{ user_question }}</p>
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="flex justify-start">
+            <div class="bg-[#F8FAFC] border border-[#E2E8F0] text-[#0F172A] rounded-2xl rounded-tl-sm p-4 max-w-[88%] text-xs leading-relaxed shadow-sm">
+              <div class="flex items-center gap-1.5 mb-2">
+                <span class="w-4 h-4 rounded-full bg-[#ECFDF5] text-[#059669] flex items-center justify-center text-[10px]">🤖</span>
+                <span class="font-extrabold text-[11px] text-[#059669] uppercase tracking-wide">AI Mentor Agent</span>
+              </div>
+              <div class="markdown-content text-xs leading-relaxed space-y-2">
+                {{ reply_data.reply|safe }}
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <div class="h-64 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-[#E2E8F0] rounded-xl">
+            <span class="text-3xl mb-2">💬</span>
+            <h4 class="font-bold text-sm text-[#0F172A] mb-1">Ask your AI Mentor anything about your path</h4>
+            <p class="text-xs text-[#64748B] max-w-sm">
+              Curious about your skill gaps, how to prepare for interviews, or how your roadmap adapted? Click a suggested inquiry above or type below.
+            </p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Prompt Input Form -->
+      <form action="{{ url_for('mentor') }}" method="POST" id="mentorForm" class="mt-auto">
+        <div class="flex gap-2">
+          <textarea name="question" id="mentorInput" rows="2" required placeholder="Type your learning question or obstacle here..." class="flex-1 text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-xl focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 resize-none">{{ user_question or '' }}</textarea>
+          <button type="submit" class="bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-5 rounded-xl shadow-sm transition-all hover:-translate-y-0.5 shrink-0 flex items-center justify-center gap-1.5">
+            <span>Consult Mentor</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </div>
+        <span class="text-[10px] text-[#64748B] block mt-1">Instant personalized tactical guidance grounded in your active profile, gaps, and quiz history</span>
+      </form>
+    </div>
+
+    <!-- Side Context (4 cols) -->
+    <div class="lg:col-span-4 space-y-5">
+      
+      <!-- Learner Context Card -->
+      <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm text-xs space-y-3">
+        <div class="flex items-center justify-between border-b border-[#E2E8F0] pb-2">
+          <h3 class="font-extrabold text-xs text-[#0F172A] uppercase tracking-wider">Active Learner State</h3>
+          <span class="text-sm">👤</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span class="text-[#64748B]">Learner:</span>
+          <strong class="text-[#0F172A]">{{ profile.name }}</strong>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-[#64748B]">Current Goal:</span>
+          <span class="bg-[#EFF6FF] text-[#0056D2] font-bold px-2 py-0.5 rounded text-[11px]">{{ profile.career }}</span>
+        </div>
+
+        <div>
+          <span class="text-[#64748B] block mb-1">Declared Skills:</span>
+          <code class="bg-[#F8FAFC] border border-[#E2E8F0] p-1.5 rounded block font-mono text-[11px] text-[#334155]">{{ profile.skills }}</code>
+        </div>
+
+        <div class="flex justify-between items-center pt-2 border-t border-[#E2E8F0]">
+          <span class="text-[#64748B]">Latest Score:</span>
+          {% if assessments %}
+            <span class="font-bold text-[11px] px-2 py-0.5 rounded {% if assessments[0].percentage < 60 %}bg-[#FEF2F2] text-[#B91C1C]{% else %}bg-[#ECFDF5] text-[#047857]{% endif %}">
+              {{ assessments[0].score }}/{{ assessments[0].total }} ({{ assessments[0].percentage }}%)
+            </span>
+          {% else %}
+            <span class="text-[#64748B] italic">None</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Agent Trace Mini Logs -->
+      <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm text-xs">
+        <div class="flex items-center justify-between border-b border-[#E2E8F0] pb-2 mb-3">
+          <h3 class="font-extrabold text-xs text-[#0F172A] uppercase tracking-wider">Recent Agent Trace</h3>
+          <span class="text-sm">⚡</span>
+        </div>
+
+        <div class="space-y-2">
+          {% for log in recent_logs[:4] %}
+            <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-2.5">
+              <span class="font-extrabold text-[#0056D2] block text-[11px]">{{ log.agent_name }}</span>
+              <p class="text-[11px] text-[#334155] leading-snug mt-0.5">{{ log.summary }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function fillPrompt(text) {
+    const input = document.getElementById('mentorInput');
+    input.value = text;
+    document.getElementById('mentorForm').submit();
+  }
+</script>
+{% endblock %}

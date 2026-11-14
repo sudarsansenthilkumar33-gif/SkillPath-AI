@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+
+{% block title %}SkillPath AI — Enterprise Admin & Analytics Portal{% endblock %}
+
+{% block extra_head %}
+<!-- Tailwind CSS CDN directly in head -->
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block content %}
+<div class="admin-portal-shell space-y-8">
+
+  <!-- Admin Header Banner -->
+  <header class="bg-white border border-[#E2E8F0] rounded-2xl p-6 lg:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+    <div>
+      <div class="inline-flex items-center gap-2 bg-[#F5F3FF] text-[#7C3AED] border border-[#DDD6FE] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+        <span class="w-2 h-2 rounded-full bg-[#7C3AED] animate-pulse"></span>
+        Enterprise Governance &amp; Analytics
+      </div>
+      <h1 class="text-2xl lg:text-3xl font-extrabold text-[#0F172A] tracking-tight">
+        Cohort Performance &amp; Agent Administration
+      </h1>
+      <p class="text-sm text-[#64748B] mt-1 max-w-2xl">
+        Monitor real-time learner readiness across cohorts, inspect multi-agent remediation metrics, and manage target career curriculum benchmarks in SQLite.
+      </p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="flex items-center gap-3 shrink-0">
+      <a href="{{ url_for('dashboard') }}" class="inline-flex items-center gap-2 bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-sm transition-all hover:-translate-y-0.5">
+        <span>← Live Learner Dashboard</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       1. Platform-Wide KPI Cards
+       ========================================================================= -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    
+    <!-- KPI 1: Active Learners -->
+    <div class="bg-white border border-[#E2E8F0] border-t-4 border-t-[#0056D2] rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between text-xs font-bold text-[#64748B] mb-2">
+        <span>TOTAL COHORT LEARNERS</span>
+        <span class="p-1.5 bg-[#EFF6FF] text-[#0056D2] rounded-lg">👥</span>
+      </div>
+      <div class="text-3xl font-extrabold text-[#0F172A] mb-1">
+        {{ kpis.total_learners }}
+      </div>
+      <div class="flex items-center gap-1.5 text-xs text-[#10B981] font-semibold">
+        <span>↑ 100% active retention</span>
+        <span class="text-[#94A3B8]">&middot; SQLite store</span>
+      </div>
+    </div>
+
+    <!-- KPI 2: Avg Role Readiness -->
+    <div class="bg-white border border-[#E2E8F0] border-t-4 border-t-[#10B981] rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between text-xs font-bold text-[#64748B] mb-2">
+        <span>AVG ROLE READINESS</span>
+        <span class="p-1.5 bg-[#ECFDF5] text-[#10B981] rounded-lg">🎯</span>
+      </div>
+      <div class="text-3xl font-extrabold text-[#0F172A] mb-1">
+        {{ kpis.avg_readiness }}%
+      </div>
+      <div class="w-full bg-[#F1F5F9] h-2 rounded-full overflow-hidden mt-2">
+        <div class="bg-[#10B981] h-full rounded-full" style="width: {{ kpis.avg_readiness }}%;"></div>
+      </div>
+    </div>
+
+    <!-- KPI 3: Demanded Skill Gaps -->
+    <div class="bg-white border border-[#E2E8F0] border-t-4 border-t-[#F59E0B] rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between text-xs font-bold text-[#64748B] mb-2">
+        <span>TOP DEMANDED GAP</span>
+        <span class="p-1.5 bg-[#FFFBEB] text-[#F59E0B] rounded-lg">⚡</span>
+      </div>
+      <div class="text-xl font-extrabold text-[#0F172A] mb-1 truncate" title="{{ kpis.top_skill_gaps[0].name }}">
+        {{ kpis.top_skill_gaps[0].name }}
+      </div>
+      <div class="text-xs text-[#B45309] font-semibold">
+        Impact: {{ kpis.top_skill_gaps[0].cohort_impact }} &middot; 94% gap density
+      </div>
+    </div>
+
+    <!-- KPI 4: Remedial Interventions Triggered -->
+    <div class="bg-white border border-[#E2E8F0] border-t-4 border-t-[#EF4444] rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between text-xs font-bold text-[#64748B] mb-2">
+        <span>REMEDIAL INTERVENTIONS</span>
+        <span class="p-1.5 bg-[#FEF2F2] text-[#EF4444] rounded-lg">⚠️</span>
+      </div>
+      <div class="text-3xl font-extrabold text-[#0F172A] mb-1">
+        {{ kpis.remedial_interventions }}
+      </div>
+      <div class="text-xs text-[#DC2626] font-semibold">
+        Triggered when diagnostic score &lt; 60%
+      </div>
+    </div>
+
+  </section>
+
+  <!-- =========================================================================
+       2. Live Learner Cohort Table
+       ========================================================================= -->
+  <section class="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-[#E2E8F0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <div class="text-xs font-bold uppercase tracking-wider text-[#0056D2] mb-1">COHORT PERFORMANCE MATRIX</div>
+        <h2 class="text-lg font-extrabold text-[#0F172A]">Active Learner Cohort Roster</h2>
+        <p class="text-xs text-[#64748B] mt-0.5">Live status, target tracks, and readiness benchmarks for all registered learners in SQLite.</p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 text-xs font-bold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] px-3 py-1 rounded-full">
+          <span class="w-2 h-2 rounded-full bg-[#10B981] animate-ping"></span>
+          Live Cohort Sync Active
+        </span>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-[#F8FAFC] border-b border-[#E2E8F0] text-[#64748B] font-bold uppercase tracking-wider text-[11px]">
+          <tr>
+            <th class="py-3.5 px-6">Learner Profile</th>
+            <th class="py-3.5 px-6">Target Role</th>
+            <th class="py-3.5 px-6">Role Readiness</th>
+            <th class="py-3.5 px-6">Verified Strengths</th>
+            <th class="py-3.5 px-6">Priority Gaps</th>
+            <th class="py-3.5 px-6">Intervention State</th>
+            <th class="py-3.5 px-6 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#E2E8F0]">
+          {% for learner in cohort %}
+            <tr class="hover:bg-[#F8FAFC] transition-colors">
+              <!-- Name & Provider -->
+              <td class="py-4 px-6">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-[#0056D2] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                    {{ learner.avatar }}
+                  </div>
+                  <div>
+                    <strong class="text-sm font-extrabold text-[#0F172A] block">{{ learner.name }}</strong>
+                    <span class="text-xs text-[#64748B]">{{ learner.email }}</span>
+                    <span class="inline-block uppercase text-[9px] font-bold px-1.5 py-0.2 rounded bg-[#F1F5F9] text-[#64748B] ml-1">{{ learner.provider }}</span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Target Role -->
+              <td class="py-4 px-6 font-bold text-[#0F172A]">
+                {{ learner.target_career }}
+              </td>
+
+              <!-- Readiness % -->
+              <td class="py-4 px-6">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-20 bg-[#F1F5F9] h-2 rounded-full overflow-hidden">
+                    <div class="bg-[#0056D2] h-full rounded-full" style="width: {{ learner.readiness_pct }}%;"></div>
+                  </div>
+                  <strong class="font-extrabold text-[#0F172A]">{{ learner.readiness_pct }}%</strong>
+                </div>
+              </td>
+
+              <!-- Strengths -->
+              <td class="py-4 px-6">
+                <div class="flex flex-wrap gap-1 max-w-xs">
+                  {% for s in learner.strengths %}
+                    <span class="bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] px-2 py-0.5 rounded text-[10.5px] font-bold">
+                      ✓ {{ s }}
+                    </span>
+                  {% endfor %}
+                </div>
+              </td>
+
+              <!-- Gaps -->
+              <td class="py-4 px-6">
+                <div class="flex flex-wrap gap-1 max-w-xs">
+                  {% for g in learner.gaps %}
+                    <span class="bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A] px-2 py-0.5 rounded text-[10.5px] font-bold">
+                      ⚡ {{ g }}
+                    </span>
+                  {% endfor %}
+                </div>
+              </td>
+
+              <!-- State -->
+              <td class="py-4 px-6">
+                {% if learner.status == 'Remedial Sprint' %}
+                  <span class="inline-flex items-center gap-1 bg-[#FEF2F2] text-[#B91C1C] border border-[#FECACA] px-2.5 py-1 rounded-full text-xs font-bold">
+                    <span>⚠️</span> Remedial Sprint
+                  </span>
+                {% elif learner.status == 'On Track' %}
+                  <span class="inline-flex items-center gap-1 bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] px-2.5 py-1 rounded-full text-xs font-bold">
+                    <span>✓</span> On Track
+                  </span>
+                {% else %}
+                  <span class="inline-flex items-center gap-1 bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE] px-2.5 py-1 rounded-full text-xs font-bold">
+                    <span>●</span> Active Track
+                  </span>
+                {% endif %}
+              </td>
+
+              <!-- Action -->
+              <td class="py-4 px-6 text-right">
+                <a href="{{ url_for('dashboard') }}" class="inline-flex items-center gap-1 text-xs font-bold text-[#0056D2] hover:text-[#00419E] bg-[#EFF6FF] hover:bg-[#DBEAFE] px-3 py-1.5 rounded-md transition-colors">
+                  <span>Inspect Roadmap</span>
+                  <span>→</span>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       3. Curriculum & Role Benchmark Manager (SQLite-backed)
+       ========================================================================= -->
+  <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Left: Existing Role Benchmarks Table -->
+    <div class="lg:col-span-7 bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm">
+      <div class="border-b border-[#E2E8F0] pb-4 mb-5">
+        <div class="text-xs font-bold uppercase tracking-wider text-[#0056D2] mb-1">STANDARDS TAXONOMY</div>
+        <h2 class="text-lg font-extrabold text-[#0F172A]">Curriculum &amp; Role Benchmarks</h2>
+        <p class="text-xs text-[#64748B] mt-0.5">Industry competency requirements referenced by the Career Matcher and Roadmap Architect agents.</p>
+      </div>
+
+      <div class="space-y-4">
+        {% for b in benchmarks %}
+          <div class="border border-[#E2E8F0] rounded-xl p-4 hover:border-[#0056D2] transition-colors">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <h3 class="font-extrabold text-sm text-[#0F172A]">{{ b.role }}</h3>
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE]">
+                  {{ b.estimated_weeks }}
+                </span>
+              </div>
+              <span class="text-xs font-extrabold text-[#10B981]">Demand: {{ b.demand }}</span>
+            </div>
+
+            <p class="text-xs text-[#64748B] mb-2 leading-relaxed">
+              {{ b.description }}
+            </p>
+
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[11px] font-bold text-[#64748B]">Core Skills:</span>
+              {% for skill in b.core_skills.split(',') %}
+                <span class="bg-[#F1F5F9] text-[#0F172A] text-[10.5px] font-semibold px-2 py-0.5 rounded">
+                  {{ skill.strip() }}
+                </span>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right: Add / Update Target Career Benchmark Form -->
+    <div class="lg:col-span-5 bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+      <div>
+        <div class="border-b border-[#E2E8F0] pb-4 mb-5">
+          <div class="text-xs font-bold uppercase tracking-wider text-[#10B981] mb-1">ADMINISTRATIVE EDITOR</div>
+          <h2 class="text-lg font-extrabold text-[#0F172A]">Add / Update Role Benchmark</h2>
+          <p class="text-xs text-[#64748B] mt-0.5">Changes update SQLite directly and dynamically reconfigure agent gap analysis.</p>
+        </div>
+
+        <form action="{{ url_for('add_benchmark') }}" method="POST" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-[#0F172A] mb-1" for="benchRole">Target Career Role Name <span class="text-[#EF4444]">*</span></label>
+            <input type="text" id="benchRole" name="role" required placeholder="e.g. Cloud Solutions Architect" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-[#0F172A] mb-1" for="benchDemand">Market Demand</label>
+              <select id="benchDemand" name="demand" class="w-full text-xs px-3 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] bg-white">
+                <option value="Very High">Very High</option>
+                <option value="High" selected>High</option>
+                <option value="Explosive">Explosive</option>
+                <option value="Moderate">Moderate</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-[#0F172A] mb-1" for="benchWeeks">Est. Timeline</label>
+              <input type="text" id="benchWeeks" name="estimated_weeks" value="10 - 14 Weeks" class="w-full text-xs px-3 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2]">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-[#0F172A] mb-1" for="benchSkills">
+              Core Skills Taxonomy <span class="text-[#EF4444]">*</span>
+              <small class="text-[#64748B] font-normal block">Comma-separated competencies</small>
+            </label>
+            <textarea id="benchSkills" name="core_skills" rows="3" required placeholder="e.g. AWS, Terraform, Docker, Kubernetes, Linux, Python, CI/CD" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2]"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-[#0F172A] mb-1" for="benchDesc">Curriculum Objectives</label>
+            <textarea id="benchDesc" name="description" rows="2" placeholder="e.g. Design, deploy, and scale resilient multi-cloud architectures." class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2]"></textarea>
+          </div>
+
+          <button type="submit" class="w-full bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold py-3 rounded-lg shadow-sm transition-all hover:-translate-y-0.5">
+            Save Benchmark to SQLite &amp; Update Agents →
+          </button>
+        </form>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-[#E2E8F0] text-xs text-[#64748B] leading-relaxed">
+        <strong>Governance Note:</strong> Newly submitted roles automatically appear in learner dropdown selectors across the platform without requiring server restart.
+      </div>
+    </div>
+
+  </section>
+
+</div>
+{% endblock %}

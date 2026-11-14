@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}SkillPath AI — Verifiable Career Certificate & Credential{% endblock %}
+
+{% block extra_head %}
+<!-- Tailwind CSS CDN directly in head -->
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @media print {
+    header, footer, .workflow-banner, .no-print {
+      display: none !important;
+    }
+    body {
+      background: white !important;
+    }
+    .certificate-card {
+      box-shadow: none !important;
+      border: 8px solid #0056D2 !important;
+      margin: 0 !important;
+      max-width: 100% !important;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="certificate-shell max-w-4xl mx-auto space-y-6">
+
+  <!-- Top Action Toolbar -->
+  <div class="no-print flex items-center justify-between bg-white border border-[#E2E8F0] rounded-xl p-4 shadow-sm flex-wrap gap-3">
+    <div class="flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-ping"></span>
+      <span class="text-xs font-bold text-[#0F172A]">Cryptographically Verifiable Credential Active</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="window.print()" class="inline-flex items-center gap-2 bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition-all hover:-translate-y-0.5">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        <span>Print / Save PDF Certificate</span>
+      </button>
+      <a href="{{ url_for('dashboard') }}" class="text-xs font-semibold text-[#64748B] hover:text-[#0F172A] px-3 py-2">
+        ← Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Coursera-Grade Official Certificate Card -->
+  <div class="certificate-card bg-white border-8 border-double border-[#0056D2] rounded-3xl p-8 sm:p-14 shadow-2xl relative overflow-hidden text-center space-y-8">
+    
+    <!-- Watermark Accent -->
+    <div class="absolute inset-0 flex items-center justify-center opacity-3 pointer-events-none">
+      <span class="text-9xl font-black text-[#0056D2]">SKILLPATH</span>
+    </div>
+
+    <!-- Certificate Header -->
+    <div class="space-y-2">
+      <div class="inline-flex items-center gap-2 border border-[#0056D2]/30 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest text-[#0056D2] bg-[#EFF6FF]">
+        SkillPath AI &middot; Adaptive Competency Verification
+      </div>
+      <h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#0F172A] tracking-tight uppercase">
+        Certificate of Achievement
+      </h1>
+      <p class="text-xs uppercase tracking-widest text-[#64748B] font-bold">
+        This is officially presented to
+      </p>
+    </div>
+
+    <!-- Candidate Name -->
+    <div class="border-b-2 border-[#0056D2]/20 max-w-lg mx-auto pb-2">
+      <h2 class="text-3xl sm:text-5xl font-black text-[#0056D2] tracking-tight font-serif italic">
+        {{ profile.name }}
+      </h2>
+    </div>
+
+    <!-- Description -->
+    <div class="max-w-2xl mx-auto space-y-2 text-xs sm:text-sm text-[#334155] leading-relaxed">
+      <p>
+        for successfully validating multi-tiered competencies and demonstrated technical readiness for the enterprise role of
+      </p>
+      <p class="text-xl sm:text-2xl font-black text-[#0F172A]">
+        {{ career }}
+      </p>
+      <p class="text-xs text-[#64748B]">
+        Audited by the <strong>Skill Analyzer</strong>, <strong>Career Matcher</strong>, and <strong>Progress Evaluator Agents</strong> with a verified competency rating of <strong class="text-[#059669]">{{ readiness_pct }}% Role Readiness</strong>.
+      </p>
+    </div>
+
+    <!-- Signatures & Verification Seal -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center pt-8 border-t border-[#E2E8F0] max-w-2xl mx-auto">
+      
+      <!-- Signature 1 -->
+      <div class="flex flex-col items-center">
+        <span class="font-serif italic text-lg text-[#0F172A] font-bold">Marcus Vance, Ph.D.</span>
+        <div class="w-32 h-[1px] bg-[#64748B] my-1"></div>
+        <span class="text-[10px] uppercase font-bold text-[#64748B]">Curriculum Director</span>
+      </div>
+
+      <!-- Seal / QR Badge -->
+      <div class="flex flex-col items-center">
+        <div class="w-20 h-20 rounded-full border-4 border-[#0056D2] bg-[#EFF6FF] flex items-center justify-center p-2 shadow-inner">
+          <div class="text-center">
+            <span class="text-xs">🛡️</span>
+            <span class="text-[8px] font-black uppercase tracking-tighter text-[#0056D2] block mt-0.5">VERIFIED</span>
+          </div>
+        </div>
+        <span class="text-[9px] font-mono text-[#64748B] mt-1">{{ credential_id }}</span>
+      </div>
+
+      <!-- Signature 2 -->
+      <div class="flex flex-col items-center">
+        <span class="font-serif italic text-lg text-[#0F172A] font-bold">AI Mentor Agent</span>
+        <div class="w-32 h-[1px] bg-[#64748B] my-1"></div>
+        <span class="text-[10px] uppercase font-bold text-[#64748B]">Autonomous Evaluator</span>
+      </div>
+
+    </div>
+
+    <!-- Certificate Footer Metadata -->
+    <div class="pt-4 text-[10px] text-[#94A3B8] flex items-center justify-between flex-wrap gap-2">
+      <span>Issued on: <strong>{{ issue_date }}</strong></span>
+      <span>Credential ID: <strong class="font-mono text-[#0F172A]">{{ credential_id }}</strong></span>
+      <span>Verify: <strong>skillpath.ai/verify</strong></span>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
