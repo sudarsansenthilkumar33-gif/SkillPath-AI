@@ -6,8 +6,12 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 from werkzeug.security import generate_password_hash, check_password_hash
 
-DB_DIR = os.path.join(os.path.dirname(__file__), "database")
-DB_PATH = os.path.join(DB_DIR, "students.db")
+if os.environ.get("VERCEL"):
+    DB_DIR = "/tmp"
+    DB_PATH = "/tmp/skillpath.db"
+else:
+    DB_DIR = os.path.join(os.path.dirname(__file__), "database")
+    DB_PATH = os.path.join(DB_DIR, "students.db")
 
 _BENCHMARKS_CACHE: Optional[List[Dict[str, Any]]] = None
 
