@@ -18,7 +18,7 @@ class SkillPathMultiAgentTestSuite(unittest.TestCase):
         # Test authentic real user onboarding
         res = self.client.get("/load-demo", follow_redirects=True)
         self.assertEqual(res.status_code, 200)
-        self.assertIn(b"Elena Rostova", res.data)
+        self.assertIn(b"Verified Learner", res.data)
         self.assertIn(b"Full Stack Developer", res.data)
 
         profile = get_profile()
@@ -231,6 +231,8 @@ class SkillPathMultiAgentTestSuite(unittest.TestCase):
         print("[PASS] Test 11: AI Mock Interview Simulator (/interview) passed.")
 
     def test_12_verifiable_career_certificate(self):
+        # Pre-authenticate user
+        self.client.get("/load-demo")
         # Test GET /certificate
         res = self.client.get("/certificate")
         self.assertEqual(res.status_code, 200)

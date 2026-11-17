@@ -50,10 +50,10 @@
         <span>✦</span> Enterprise Career Intelligence Audit
       </div>
       <h1 class="text-2xl sm:text-3xl font-extrabold text-[#0F172A] dark:text-white tracking-tight">
-        {{ profile.name }} &middot; Career Readiness Assessment
+        {{ full_name or profile.name }} &middot; Career Readiness Assessment
       </h1>
       <p class="text-xs text-[#64748B] dark:text-slate-400 max-w-xl">
-        Benchmarked against global industry standards for <strong>{{ profile.career }}</strong> by the SkillPath AI 4-Agent Orchestration Engine.
+        Benchmarked against global industry standards for <strong>{{ target_role or profile.career }}</strong> by the SkillPath AI 4-Agent Orchestration Engine.
       </p>
     </div>
 

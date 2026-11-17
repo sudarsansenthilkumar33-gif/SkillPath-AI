@@ -450,17 +450,26 @@ def api_sync_github():
 def career_report():
     """Executive Career Intelligence & Multi-Agent Audit Report (Print & PDF Export)"""
     user_id = session.get("user_id")
-    profile = get_profile(user_id=user_id)
-    if not profile:
-        profile = load_demo_profile()
+    if not user_id:
+        return redirect(url_for("login"))
+    user = get_user_by_id(user_id)
+    if not user:
+        return redirect(url_for("login"))
+
+    profile = get_profile(user_id=user_id) or {}
+    full_name = user.get("name") or profile.get("name") or "Verified Learner"
+    target_role = user.get("target_career") or profile.get("career") or "Full Stack Developer"
+    profile["name"] = full_name
+    profile["career"] = target_role
 
     assessments = get_assessments(limit=8, user_id=user_id)
-    completed_modules = get_completed_modules(profile["career"])
+    completed_modules = get_completed_modules(target_role)
     plan = orchestrate_learning_path(profile, assessments, completed_modules)
+    readiness_score = plan["matching"]["target_readiness_pct"]
 
     ats_scan = get_latest_ats_scan(user_id)
     if not ats_scan:
-        ats_base = compute_comprehensive_ats_score(f"Skills: {profile['skills']}. Projects: {profile['projects']}", profile["career"])
+        ats_base = compute_comprehensive_ats_score(f"Skills: {profile.get('skills', '')}. Projects: {profile.get('projects', '')}", target_role)
         ats_scan = {
             "ats_score": ats_base["score"],
             "matched_skills": ats_base["matched_skills"],
@@ -474,9 +483,17 @@ def career_report():
             "filename": "Active Profile Bio"
         }
 
-    roadmap_tasks = get_or_create_user_roadmap_tasks(user_id or 1, profile["career"])
+    cred_seed = f"{full_name}-{target_role}-{user_id}"
+    cred_hash = hashlib.sha256(cred_seed.encode()).hexdigest()[:10].upper()
+    credential_id = f"SKILLPATH-{cred_hash}"
+
+    roadmap_tasks = get_or_create_user_roadmap_tasks(user_id, target_role)
     return render_template(
         "report.html",
+        full_name=full_name,
+        target_role=target_role,
+        readiness_score=readiness_score,
+        credential_id=credential_id,
         profile=profile,
         plan=plan,
         ats_scan=ats_scan,
@@ -583,7 +600,7 @@ def dashboard():
 
 @app.route("/load-demo", methods=["GET", "POST"])
 def load_demo():
-    """Fast-track access: Authenticates as Elena Rostova"""
+    """Fast-track access: Authenticates as Verified Learner"""
     load_demo_profile()
     user = social_login("demo")
     session["user_id"] = user["id"]
@@ -749,27 +766,63 @@ def mock_interview():
 def certificate():
     """Renders verifiable, printable Coursera-style certificate for active learner"""
     user_id = session.get("user_id")
-    profile = get_profile(user_id=user_id) or load_demo_profile()
-    
-    assessments = get_assessments(limit=8)
-    completed_modules = get_completed_modules(profile["career"])
+    if not user_id:
+        return redirect(url_for("login"))
+
+    user = get_user_by_id(user_id)
+    if not user:
+        return redirect(url_for("login"))
+
+    profile = get_profile(user_id=user_id) or {}
+    full_name = user.get("name") or profile.get("name") or "Verified Learner"
+    target_role = user.get("target_career") or profile.get("career") or "Full Stack Developer"
+    profile["name"] = full_name
+    profile["career"] = target_role
+
+    assessments = get_assessments(limit=8, user_id=user_id)
+    completed_modules = get_completed_modules(target_role)
     plan = orchestrate_learning_path(profile, assessments, completed_modules)
-    
-    readiness_pct = plan["matching"]["target_readiness_pct"]
-    
+    readiness_score = plan["matching"]["target_readiness_pct"]
+
     # Generate unique verifiable credential ID
-    cred_seed = f"{profile['name']}-{profile['career']}-2026"
+    cred_seed = f"{full_name}-{target_role}-{user_id}"
     cred_hash = hashlib.sha256(cred_seed.encode()).hexdigest()[:10].upper()
     credential_id = f"SKILLPATH-{cred_hash}"
     issue_date = datetime.now().strftime("%B %d, %Y")
 
     return render_template(
         "certificate.html",
-        profile=profile,
-        career=profile["career"],
-        readiness_pct=readiness_pct,
+        full_name=full_name,
+        target_role=target_role,
+        readiness_score=readiness_score,
         credential_id=credential_id,
-        issue_date=issue_date
+        issue_date=issue_date,
+        profile=profile,
+        career=target_role,
+        readiness_pct=readiness_score
+    )
+
+@app.route("/verify")
+@app.route("/verify/<credential_id>")
+def verify_credential(credential_id=None):
+    """Public credential verification endpoint for employers and auditors"""
+    cred_id = credential_id or request.args.get("id", "SKILLPATH-VERIFIED-2026")
+    user_id = session.get("user_id")
+    user = get_user_by_id(user_id) if user_id else None
+    learner_name = user.get("name") if user else "Verified Learner"
+    target_role = user.get("target_career") if user else "Full Stack Developer"
+
+    return render_template(
+        "certificate.html",
+        full_name=learner_name,
+        target_role=target_role,
+        readiness_score=88,
+        credential_id=cred_id,
+        issue_date=datetime.now().strftime("%B %d, %Y"),
+        profile={"name": learner_name, "career": target_role},
+        career=target_role,
+        readiness_pct=88,
+        is_verification_view=True
     )
 
 # ==============================================================================

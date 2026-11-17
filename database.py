@@ -259,6 +259,7 @@ def init_db():
 
         # Purge legacy demo names
         con.execute("DELETE FROM users WHERE name LIKE '%Maya Patel%' OR email LIKE '%maya.patel%'")
+        con.execute("DELETE FROM users WHERE name LIKE '%Elena Rostova%' OR email LIKE '%elena.rostova%'")
 
         # Seed initial cohort users if none exist
         user_count = con.execute("SELECT COUNT(*) as cnt FROM users").fetchone()["cnt"]
@@ -266,7 +267,7 @@ def init_db():
             default_pass = generate_password_hash("pass123")
             admin_pass = generate_password_hash("admin123")
             initial_users = [
-                ("elena.rostova@berkeleysystems.org", "Elena Rostova", default_pass, "local", "ER", "Full Stack Developer", "Learner", "B.S. EECS (UC Berkeley)", "Python, SQL, HTML, CSS", "RESTful Microservices, Real-time Dashboard", "AWS Certified Developer", 1350, 6),
+                ("learner@skillpath.ai", "Verified Learner", default_pass, "local", "VL", "Full Stack Developer", "Learner", "B.S. EECS", "Python, SQL, HTML, CSS", "RESTful Microservices, Real-time Dashboard", "AWS Certified Developer", 1350, 6),
                 ("sarah.jenkins@stanford.edu", "Sarah Jenkins", default_pass, "google", "SJ", "Data Scientist", "Learner", "M.S. Applied Statistics", "Python, SQL, Pandas, NumPy", "Customer Churn Predictor", "Google Data Analytics", 1600, 7),
                 ("priya.sharma@techcorp.io", "Priya Sharma", default_pass, "github", "PS", "AI Engineer", "Learner", "B.Tech Computer Engineering", "Python, PyTorch, LangChain", "Enterprise RAG Assistant", "DeepLearning.AI", 950, 3),
                 ("david.miller@cloudops.net", "David Miller", default_pass, "linkedin", "DM", "DevOps & Cloud Engineer", "Learner", "B.S. Information Systems", "Linux, Docker, AWS", "Kubernetes Multi-Node Cluster", "AWS Solutions Architect", 1400, 6),
@@ -387,8 +388,8 @@ def update_target_career(career_name, user_id=None):
 
 def load_demo_profile():
     profile_data = {
-        "name": "Elena Rostova",
-        "education": "B.S. Electrical Engineering & CS (UC Berkeley)",
+        "name": "Verified Learner",
+        "education": "B.S. Electrical Engineering & CS",
         "skills": "Python, SQL, HTML, CSS",
         "career": "Full Stack Developer",
         "experience_level": "Junior Developer",

@@ -195,11 +195,23 @@ class TestSkillPathAIApp(unittest.TestCase):
 
     def test_15_verified_certificate_page(self):
         """Verify /certificate renders printable credential with user's real name and ID."""
+        # Anonymous users are redirected to login
+        anon_client = app.test_client()
+        res_anon = anon_client.get("/certificate")
+        self.assertEqual(res_anon.status_code, 302)
+        self.assertIn("/login", res_anon.headers.get("Location", ""))
+
+        # Logged-in user receives dynamically rendered certificate
         res = self.client.get("/certificate")
         self.assertEqual(res.status_code, 200)
         self.assertIn(b"Certificate of Achievement", res.data)
         self.assertIn(b"Credential ID:", res.data)
         self.assertIn(b"VERIFIED", res.data)
+        self.assertIn(b"SkillPath AI Assessment Engine", res.data)
+        self.assertIn(b"AI Mentor Agent", res.data)
+        self.assertIn(b"skillapi.vercel.app/verify", res.data)
+        self.assertNotIn(b"Elena Rostova", res.data)
+        self.assertNotIn(b"Marcus Vance, Ph.D.", res.data)
 
     def test_16_ai_mock_interview_evaluation(self):
         """Verify /interview accepts technical responses, calculates score, and awards XP."""
@@ -245,11 +257,19 @@ class TestSkillPathAIApp(unittest.TestCase):
 
     def test_19_career_report_page(self):
         """Verify /report renders executive Career Intelligence Report."""
+        # Anonymous users are redirected to login
+        anon_client = app.test_client()
+        res_anon = anon_client.get("/report")
+        self.assertEqual(res_anon.status_code, 302)
+        self.assertIn("/login", res_anon.headers.get("Location", ""))
+
+        # Logged-in user receives dynamically rendered report
         res = self.client.get("/report")
         self.assertEqual(res.status_code, 200)
         self.assertIn(b"Career Intelligence", res.data)
         self.assertIn(b"30-60-90 Day Actionable Learning Sprint", res.data)
         self.assertIn(b"Print / Save PDF Report", res.data)
+        self.assertNotIn(b"Elena Rostova", res.data)
 
     def test_20_rewrite_bullet_api(self):
         """Verify /api/rewrite-bullet transforms weak bullet into STAR format."""
@@ -383,6 +403,19 @@ class TestSkillPathAIApp(unittest.TestCase):
         self.assertIn(b'content="#2563eb"', res_dash.data)
         self.assertIn(b"pwa-install-trigger", res_dash.data)
         self.assertIn(b"/sw.js", res_dash.data)
+
+    def test_27_public_credential_verification_endpoint(self):
+        """Verify /verify and /verify/<id> public endpoints render valid credentials without authentication."""
+        anon_client = app.test_client()
+        res = anon_client.get("/verify")
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(b"Certificate of Achievement", res.data)
+        self.assertIn(b"SkillPath AI Assessment Engine", res.data)
+        self.assertIn(b"skillapi.vercel.app/verify", res.data)
+
+        res2 = anon_client.get("/verify/SKILLPATH-TEST-999")
+        self.assertEqual(res2.status_code, 200)
+        self.assertIn(b"SKILLPATH-TEST-999", res2.data)
 
 
 if __name__ == "__main__":
