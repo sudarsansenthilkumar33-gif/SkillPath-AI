@@ -49,12 +49,12 @@
 
         <div class="flex items-center gap-2 text-xs text-[#64748B] mt-1 flex-wrap">
           <span class="inline-flex items-center gap-1">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
             {{ profile.education }}
           </span>
           <span>&bull;</span>
           <span class="inline-flex items-center gap-1">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
             {{ profile.projects or 'Portfolio Candidate' }}
           </span>
         </div>
@@ -102,8 +102,8 @@
     <!-- Hero Action Buttons with 1-Line Subtitles -->
     <div class="flex flex-col gap-2.5 min-w-[240px] shrink-0">
       <div>
-        <button class="w-full inline-flex items-center justify-center gap-2 bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm transition-all hover:-translate-y-0.5" onclick="openAssessmentModal()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <button class="w-full inline-flex items-center justify-center gap-2 bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm transition-all hover:-translate-y-0.5" onclick="openAssessmentModal()" aria-label="Take Skill Assessment">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
           <span>Take Skill Assessment</span>
         </button>
         <span class="text-[10px] text-[#64748B] block mt-0.5 text-center">Test skills with 5 questions; score &lt;60% dynamically triggers remediation</span>
@@ -610,7 +610,7 @@
                 </div>
                 <div>
                   <span class="inline-flex items-center gap-1.5 text-xs font-bold bg-white border border-[#E2E8F0] px-3 py-1 rounded-full text-[#334155] shadow-sm">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     {{ phase.duration }}
                   </span>
                 </div>
@@ -631,7 +631,7 @@
                           {% if phase.is_remedial or phase.phase_number == '1' %}Beginner{% elif phase.phase_number == '2' %}Intermediate{% else %}Advanced{% endif %}
                         </span>
                         <span class="inline-flex items-center gap-1 text-[11px] text-[#64748B] font-semibold">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                           {{ mod.hours }}
                         </span>
                       </div>
@@ -678,11 +678,11 @@
                       <span class="text-[11px] font-bold text-[#64748B] block mb-1">Curated Resources:</span>
                       <div class="flex items-center gap-2 flex-wrap">
                         {% for res in mod.resources %}
-                          <a href="{{ res.url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 bg-[#F8FAFC] hover:bg-[#EFF6FF] border border-[#E2E8F0] hover:border-[#BFDBFE] px-2.5 py-1 rounded-lg text-xs transition-colors">
+                          <a href="{{ res.url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 bg-[#F8FAFC] hover:bg-[#EFF6FF] border border-[#E2E8F0] hover:border-[#BFDBFE] px-2.5 py-1 rounded-lg text-xs transition-colors" aria-label="{{ res.platform }}: {{ res.name }}">
                             <strong class="text-[#0056D2]">{{ res.platform }}:</strong>
                             <span class="text-[#0F172A] font-medium">{{ res.name }}</span>
                             <span class="text-[10px] text-[#64748B]">({{ res.type }})</span>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                           </a>
                         {% endfor %}
                       </div>
@@ -709,13 +709,13 @@
                         <input type="hidden" name="career" value="{{ profile.career }}">
                         <input type="hidden" name="module_id" value="{{ mod.id }}">
                         {% if mod.completed %}
-                          <button type="submit" class="inline-flex items-center gap-1.5 bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0] text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          <button type="submit" class="inline-flex items-center gap-1.5 bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0] text-xs font-bold px-3 py-1.5 rounded-lg transition-colors" aria-label="Toggle completed module: {{ mod.title }}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             <span>✓ Completed (Click to Toggle)</span>
                           </button>
                         {% else %}
-                          <button type="submit" class="inline-flex items-center gap-1.5 bg-white hover:bg-[#EFF6FF] text-[#0056D2] border border-[#CBD5E1] hover:border-[#0056D2] text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                          <button type="submit" class="inline-flex items-center gap-1.5 bg-white hover:bg-[#EFF6FF] text-[#0056D2] border border-[#CBD5E1] hover:border-[#0056D2] text-xs font-bold px-3 py-1.5 rounded-lg transition-colors" aria-label="Mark module complete: {{ mod.title }}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle></svg>
                             <span>○ Mark Module Complete (+250 XP)</span>
                           </button>
                         {% endif %}

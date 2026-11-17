@@ -49,12 +49,12 @@
       <div class="nav-left flex items-center gap-3 shrink-0">
         <!-- Mobile Drawer Hamburger Button -->
         <button type="button" onclick="toggleMobileDrawer()" class="lg:hidden p-2 text-[#334155] hover:text-[#0056D2] hover:bg-[#F1F5F9] rounded-lg focus:outline-none" aria-label="Open Navigation Menu">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
 
         <a class="brand flex items-center gap-2.5 group" href="{{ url_for('dashboard') }}">
           <div class="brand-logo-wrap w-9 h-9 bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
-            <svg class="brand-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg class="brand-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SkillPath AI Logo">
               <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#0056D2" stroke="#0056D2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M2 17L12 22L22 17" stroke="#0056D2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M2 12L12 17L22 12" stroke="#0056D2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -77,7 +77,7 @@
           <form action="{{ url_for('switch_role') }}" method="POST" class="role-switcher-form" id="globalRoleForm">
             <div class="switcher-box flex items-center bg-white border border-[#CBD5E1] rounded-lg px-2.5 py-1 shadow-xs hover:border-[#0056D2] focus-within:border-[#0056D2] focus-within:ring-2 focus-within:ring-[#0056D2]/20 transition-all">
               <label class="switcher-label flex items-center gap-1.5 text-xs font-semibold text-[#64748B] mr-2 whitespace-nowrap" for="roleSelect">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
@@ -92,7 +92,7 @@
                   {% endfor %}
                 </select>
                 <span class="select-arrow absolute right-0 pointer-events-none text-[#64748B]">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </span>
               </div>
             </div>
@@ -143,8 +143,8 @@
             <span class="text-[9.5px] text-[#64748B] font-medium">{{ current_user.role or 'Learner' }}</span>
           </div>
           {% if current_user.is_authenticated %}
-            <a href="{{ url_for('logout') }}" class="logout-btn ml-0.5 text-[#64748B] hover:text-[#EF4444] p-1 rounded transition-colors" title="Sign Out">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <a href="{{ url_for('logout') }}" class="logout-btn ml-0.5 text-[#64748B] hover:text-[#EF4444] p-1 rounded transition-colors" title="Sign Out" aria-label="Sign Out">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             </a>
           {% else %}
             <a href="{{ url_for('login') }}" class="login-btn ml-0.5 text-xs font-bold text-[#0056D2] hover:underline px-1">
@@ -263,11 +263,11 @@
             <div class="toast-card pointer-events-auto flex items-start gap-3 bg-white border border-[#E2E8F0] rounded-xl p-3.5 shadow-lg text-xs transition-all {% if category == 'remediation' or category == 'warning' %}border-l-4 border-l-[#F59E0B]{% elif category == 'success' %}border-l-4 border-l-[#10B981]{% else %}border-l-4 border-l-[#0056D2]{% endif %}">
               <div class="toast-indicator shrink-0 mt-0.5">
                 {% if category == 'remediation' or category == 'warning' %}
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                 {% elif category == 'success' %}
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                 {% else %}
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0056D2" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0056D2" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                 {% endif %}
               </div>
               <div class="toast-body flex-1 text-[#0F172A] leading-snug">

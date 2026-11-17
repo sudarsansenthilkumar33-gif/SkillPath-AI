@@ -109,9 +109,9 @@
       <form action="{{ url_for('mentor') }}" method="POST" id="mentorForm" class="mt-auto">
         <div class="flex gap-2">
           <textarea name="question" id="mentorInput" rows="2" required placeholder="Type your learning question or obstacle here..." class="flex-1 text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-xl focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 resize-none">{{ user_question or '' }}</textarea>
-          <button type="submit" class="bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-5 rounded-xl shadow-sm transition-all hover:-translate-y-0.5 shrink-0 flex items-center justify-center gap-1.5">
+          <button type="submit" aria-label="Consult AI Mentor" class="bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-5 rounded-xl shadow-sm transition-all hover:-translate-y-0.5 shrink-0 flex items-center justify-center gap-1.5">
             <span>Consult Mentor</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
           </button>
         </div>
         <span class="text-[10px] text-[#64748B] block mt-1">Instant personalized tactical guidance grounded in your active profile, gaps, and quiz history</span>

@@ -35,6 +35,7 @@ class TestSkillPathAIApp(unittest.TestCase):
     def test_01_security_headers_present(self):
         """Verify defense-in-depth security headers are present on all responses."""
         res = self.client.get("/")
+        self.assertIn("default-src", res.headers.get("Content-Security-Policy", ""))
         self.assertEqual(res.headers.get("X-Content-Type-Options"), "nosniff")
         self.assertEqual(res.headers.get("X-Frame-Options"), "DENY")
         self.assertEqual(res.headers.get("X-XSS-Protection"), "1; mode=block")

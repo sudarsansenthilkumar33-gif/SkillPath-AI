@@ -43,6 +43,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 @app.after_request
 def set_security_headers(response):
     """Enforce defense-in-depth security headers across all application responses."""
+    response.headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com data:;"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
