@@ -50,35 +50,35 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   {% block extra_head %}{% endblock %}
 </head>
-<body class="coursera-theme bg-[#F8FAFC] text-[#0F172A] font-sans min-h-screen flex flex-col antialiased">
+<body class="coursera-theme bg-[#F8FAFC] dark:bg-slate-950 text-[#0F172A] dark:text-slate-100 font-sans min-h-screen flex flex-col antialiased">
   <!-- Skip to Main Content Link for Keyboard & Screen Reader Accessibility -->
   <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#0056D2] focus:text-white focus:rounded-lg focus:font-bold focus:shadow-lg">Skip to main content</a>
   <div class="app-layout flex flex-col min-h-screen">
     
-    <!-- Top Navigation Bar (100% Responsive with Mobile Drawer) -->
-    <header class="top-nav sticky top-0 z-50 bg-white border-b border-[#E2E8F0] shadow-sm px-4 lg:px-7 py-2.5 flex items-center justify-between gap-3">
+    <!-- Top Navigation Bar (100% Responsive, Fixed Height & Padding, Logo Never Clipped) -->
+    <header class="top-nav sticky top-0 z-50 min-h-[64px] h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-[#E2E8F0] dark:border-slate-800 shadow-xs px-3 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-2 sm:gap-4 transition-colors">
       
       <!-- Left: Logo & Enterprise Badge + Mobile Menu Toggle -->
-      <div class="nav-left flex items-center gap-3 shrink-0">
+      <div class="nav-left flex items-center gap-2 sm:gap-3 shrink-0">
         <!-- Mobile Drawer Hamburger Button -->
-        <button type="button" onclick="toggleMobileDrawer()" class="lg:hidden p-2 text-[#334155] hover:text-[#0056D2] hover:bg-[#F1F5F9] rounded-lg focus:outline-none" aria-label="Open Navigation Menu">
+        <button type="button" onclick="toggleMobileDrawer()" class="lg:hidden p-2 text-[#334155] dark:text-slate-300 hover:text-[#0056D2] hover:bg-[#F1F5F9] dark:hover:bg-slate-800 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0056D2]" aria-label="Open Navigation Menu">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
 
-        <a class="brand flex items-center gap-2.5 group" href="{{ url_for('dashboard') }}">
-          <div class="brand-logo-wrap w-9 h-9 bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+        <a class="brand flex items-center gap-2 sm:gap-2.5 group shrink-0 select-none" href="{{ url_for('dashboard') }}" aria-label="SkillPath AI Homepage">
+          <div class="brand-logo-wrap w-9 h-9 bg-[#EFF6FF] dark:bg-slate-800 border border-[#BFDBFE] dark:border-slate-700 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
             <svg class="brand-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SkillPath AI Logo">
               <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#0056D2" stroke="#0056D2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M2 17L12 22L22 17" stroke="#0056D2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M2 12L12 17L22 12" stroke="#0056D2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <div class="brand-identity flex flex-col">
-            <div class="brand-title-row flex items-center gap-1.5">
-              <span class="brand-name text-base font-black text-[#0F172A] tracking-tight">SkillPath <span class="text-[#0056D2]">AI</span></span>
-              <span class="enterprise-badge text-[9.5px] font-extrabold uppercase tracking-wider bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full hidden sm:inline-block">Enterprise</span>
+          <div class="brand-identity flex flex-col justify-center">
+            <div class="brand-title-row flex items-center gap-1.5 whitespace-nowrap">
+              <span class="brand-name text-base sm:text-lg font-black text-[#0F172A] dark:text-white tracking-tight">SkillPath <span class="text-[#0056D2] dark:text-[#38BDF8]">AI</span></span>
+              <span class="enterprise-badge text-[9px] font-extrabold uppercase tracking-wider bg-[#EFF6FF] dark:bg-slate-800 text-[#0056D2] dark:text-[#38BDF8] border border-[#BFDBFE] dark:border-slate-700 px-1.5 py-0.5 rounded-full hidden sm:inline-block">Enterprise</span>
             </div>
-            <span class="brand-tagline text-[11px] font-medium text-[#64748B] hidden md:inline-block">Adaptive Career Intelligence</span>
+            <span class="brand-tagline text-[10.5px] font-medium text-[#64748B] dark:text-slate-400 hidden md:inline-block leading-none">Adaptive Career Intelligence</span>
           </div>
         </a>
       </div>
@@ -88,8 +88,8 @@
         <!-- Target Career Selector -->
         <div class="header-control-group flex flex-col items-start">
           <form action="{{ url_for('switch_role') }}" method="POST" class="role-switcher-form" id="globalRoleForm">
-            <div class="switcher-box flex items-center bg-white border border-[#CBD5E1] rounded-lg px-2.5 py-1 shadow-xs hover:border-[#0056D2] focus-within:border-[#0056D2] focus-within:ring-2 focus-within:ring-[#0056D2]/20 transition-all">
-              <label class="switcher-label flex items-center gap-1.5 text-xs font-semibold text-[#64748B] mr-2 whitespace-nowrap" for="roleSelect">
+            <div class="switcher-box flex items-center bg-white dark:bg-slate-800 border border-[#CBD5E1] dark:border-slate-700 rounded-lg px-2.5 py-1 shadow-xs hover:border-[#0056D2] focus-within:border-[#0056D2] focus-within:ring-2 focus-within:ring-[#0056D2]/20 transition-all">
+              <label class="switcher-label flex items-center gap-1.5 text-xs font-semibold text-[#64748B] dark:text-slate-300 mr-2 whitespace-nowrap" for="roleSelect">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>
@@ -97,80 +97,80 @@
                 <span>Role:</span>
               </label>
               <div class="select-wrapper relative inline-flex items-center">
-                <select name="career" id="roleSelect" class="bg-transparent border-none text-xs font-bold text-[#0F172A] pr-5 outline-none cursor-pointer" onchange="document.getElementById('globalRoleForm').submit()">
+                <select name="career" id="roleSelect" class="bg-transparent border-none text-xs font-bold text-[#0F172A] dark:text-slate-100 pr-5 outline-none cursor-pointer" onchange="document.getElementById('globalRoleForm').submit()">
                   {% for role in available_roles %}
                     <option value="{{ role }}" {% if current_profile and current_profile.career == role %}selected{% endif %}>
                       {{ role }}
                     </option>
                   {% endfor %}
                 </select>
-                <span class="select-arrow absolute right-0 pointer-events-none text-[#64748B]">
+                <span class="select-arrow absolute right-0 pointer-events-none text-[#64748B] dark:text-slate-400">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </span>
               </div>
             </div>
           </form>
-          <span class="btn-helper-sub text-[10px] text-[#64748B] mt-0.5 truncate max-w-[210px]">Switch role to recalculate</span>
+          <span class="btn-helper-sub text-[10px] text-[#64748B] dark:text-slate-400 mt-0.5 truncate max-w-[210px]">Switch role to recalculate</span>
         </div>
       </div>
 
       <!-- Right: Navigation Links, Gamified XP & User Avatar -->
-      <div class="nav-right flex items-center gap-2.5 shrink-0">
+      <div class="nav-right flex items-center gap-2 sm:gap-2.5 shrink-0">
         <!-- Desktop Nav Tabs -->
         <nav class="nav-tabs hidden xl:flex items-center gap-1" aria-label="Main Navigation">
-          <a href="{{ url_for('dashboard') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'dashboard' %}text-[#0056D2] bg-[#EFF6FF] font-bold{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}">
+          <a href="{{ url_for('dashboard') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'dashboard' %}text-[#0056D2] dark:text-[#38BDF8] bg-[#EFF6FF] dark:bg-slate-800 font-bold{% else %}text-[#334155] dark:text-slate-300 hover:bg-[#F1F5F9] dark:hover:bg-slate-800{% endif %}">
             <span>Dashboard</span>
           </a>
-          <a href="{{ url_for('assessment') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint in ('assessment', 'assessments') %}text-[#0056D2] bg-[#EFF6FF] font-bold{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}">
+          <a href="{{ url_for('assessment') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint in ('assessment', 'assessments') %}text-[#0056D2] dark:text-[#38BDF8] bg-[#EFF6FF] dark:bg-slate-800 font-bold{% else %}text-[#334155] dark:text-slate-300 hover:bg-[#F1F5F9] dark:hover:bg-slate-800{% endif %}">
             <span>Assessments</span>
           </a>
-          <a href="{{ url_for('mock_interview') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'mock_interview' %}text-[#0056D2] bg-[#EFF6FF] font-bold{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}">
+          <a href="{{ url_for('mock_interview') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'mock_interview' %}text-[#0056D2] dark:text-[#38BDF8] bg-[#EFF6FF] dark:bg-slate-800 font-bold{% else %}text-[#334155] dark:text-slate-300 hover:bg-[#F1F5F9] dark:hover:bg-slate-800{% endif %}">
             <span class="text-xs">🎙️</span>
             <span>AI Mock Interview</span>
           </a>
-          <a href="{{ url_for('career_report') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'career_report' %}text-[#0056D2] bg-[#EFF6FF] font-bold{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}">
+          <a href="{{ url_for('career_report') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'career_report' %}text-[#0056D2] dark:text-[#38BDF8] bg-[#EFF6FF] dark:bg-slate-800 font-bold{% else %}text-[#334155] dark:text-slate-300 hover:bg-[#F1F5F9] dark:hover:bg-slate-800{% endif %}">
             <span>📑</span>
             <span>Career Report</span>
           </a>
-          <a href="{{ url_for('certificate') }}" class="nav-tab inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'certificate' %}text-[#059669] bg-[#ECFDF5] font-bold border border-[#A7F3D0]{% else %}text-[#059669] hover:bg-[#ECFDF5]{% endif %}">
+          <a href="{{ url_for('certificate') }}" class="nav-tab inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'certificate' %}text-[#059669] dark:text-[#34D399] bg-[#ECFDF5] dark:bg-emerald-950/40 font-bold border border-[#A7F3D0] dark:border-emerald-800{% else %}text-[#059669] dark:text-[#34D399] hover:bg-[#ECFDF5] dark:hover:bg-emerald-950/30{% endif %}">
             <span>🎓 Certificate</span>
           </a>
-          <a href="{{ url_for('mentor') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'mentor' %}text-[#0056D2] bg-[#EFF6FF] font-bold{% else %}text-[#334155] hover:bg-[#F1F5F9]{% endif %}">
+          <a href="{{ url_for('mentor') }}" class="nav-tab inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'mentor' %}text-[#0056D2] dark:text-[#38BDF8] bg-[#EFF6FF] dark:bg-slate-800 font-bold{% else %}text-[#334155] dark:text-slate-300 hover:bg-[#F1F5F9] dark:hover:bg-slate-800{% endif %}">
             <span>AI Mentor</span>
           </a>
-          <a href="{{ url_for('admin_portal') }}" class="nav-tab inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'admin_portal' %}text-[#7C3AED] bg-[#F5F3FF] font-bold border border-[#DDD6FE]{% else %}text-[#7C3AED] hover:bg-[#F5F3FF]{% endif %}">
+          <a href="{{ url_for('admin_portal') }}" class="nav-tab inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors {% if request.endpoint == 'admin_portal' %}text-[#7C3AED] dark:text-[#A78BFA] bg-[#F5F3FF] dark:bg-purple-950/40 font-bold border border-[#DDD6FE] dark:border-purple-800{% else %}text-[#7C3AED] dark:text-[#A78BFA] hover:bg-[#F5F3FF] dark:hover:bg-purple-950/30{% endif %}">
             <span>Admin</span>
           </a>
         </nav>
 
         <!-- Dark / Light Theme Toggle (Desktop) -->
-        <button type="button" onclick="toggleSkillPathTheme()" class="theme-toggle-btn p-1.5 text-[#64748B] hover:text-[#0056D2] hover:bg-[#F1F5F9] rounded-lg transition-colors border border-[#CBD5E1]" aria-label="Toggle Dark or Light Mode" title="Toggle Dark/Light Mode">
+        <button type="button" onclick="toggleSkillPathTheme()" class="theme-toggle-btn p-1.5 text-[#64748B] dark:text-slate-300 hover:text-[#0056D2] hover:bg-[#F1F5F9] dark:hover:bg-slate-800 rounded-lg transition-colors border border-[#CBD5E1] dark:border-slate-700" aria-label="Toggle Dark or Light Mode" title="Toggle Dark/Light Mode">
           <span class="dark:hidden text-xs">🌙</span>
           <span class="hidden dark:inline text-xs">☀️</span>
         </button>
 
         <!-- Gamification Badge: XP & Streak -->
-        <div class="hidden sm:flex items-center gap-1.5 bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] px-2.5 py-1 rounded-lg text-xs font-extrabold shadow-2xs">
+        <div class="hidden sm:flex items-center gap-1.5 bg-[#FFFBEB] dark:bg-amber-950/40 border border-[#FDE68A] dark:border-amber-800 text-[#92400E] dark:text-amber-300 px-2.5 py-1 rounded-lg text-xs font-extrabold shadow-2xs">
           <span>🔥</span>
           <span>{{ current_user.streak_days or 4 }}d Streak</span>
-          <span class="text-[#D97706] ml-1 bg-white/80 px-1.5 py-0.2 rounded border border-[#FDE68A]">{{ current_user.xp or 1250 }} XP</span>
+          <span class="text-[#D97706] dark:text-amber-400 ml-1 bg-white/80 dark:bg-slate-800 px-1.5 py-0.2 rounded border border-[#FDE68A] dark:border-amber-800">{{ current_user.xp or 1250 }} XP</span>
         </div>
 
         <!-- User Profile Badge & Logout -->
-        <div class="user-profile-badge flex items-center gap-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-2 py-1">
+        <div class="user-profile-badge flex items-center gap-2 bg-[#F8FAFC] dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 rounded-xl px-2 py-1">
           <div class="avatar-circle w-7 h-7 rounded-full bg-[#0056D2] text-white flex items-center justify-center text-xs font-black shadow-xs shrink-0">
             {{ current_user.avatar or 'SP' }}
           </div>
           <div class="user-meta hidden sm:flex flex-col text-left leading-tight">
-            <span class="text-xs font-bold text-[#0F172A] truncate max-w-[100px]">{{ current_user.name }}</span>
-            <span class="text-[9.5px] text-[#64748B] font-medium">{{ current_user.role or 'Learner' }}</span>
+            <span class="text-xs font-bold text-[#0F172A] dark:text-slate-100 truncate max-w-[100px]">{{ current_user.name }}</span>
+            <span class="text-[9.5px] text-[#64748B] dark:text-slate-400 font-medium">{{ current_user.role or 'Learner' }}</span>
           </div>
           {% if current_user.is_authenticated %}
-            <a href="{{ url_for('logout') }}" class="logout-btn ml-0.5 text-[#64748B] hover:text-[#EF4444] p-1 rounded transition-colors" title="Sign Out" aria-label="Sign Out">
+            <a href="{{ url_for('logout') }}" class="logout-btn ml-0.5 text-[#64748B] dark:text-slate-400 hover:text-[#EF4444] p-1 rounded transition-colors" title="Sign Out" aria-label="Sign Out">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             </a>
           {% else %}
-            <a href="{{ url_for('login') }}" class="login-btn ml-0.5 text-xs font-bold text-[#0056D2] hover:underline px-1">
+            <a href="{{ url_for('login') }}" class="login-btn ml-0.5 text-xs font-bold text-[#0056D2] dark:text-[#38BDF8] hover:underline px-1">
               Sign In
             </a>
           {% endif %}
@@ -317,24 +317,48 @@
     </div>
 
     <!-- Main Content Canvas -->
-    <main id="main-content" class="main-canvas flex-1 max-w-[1380px] w-full mx-auto px-4 lg:px-7 py-5">
+    <main id="main-content" class="main-canvas flex-1 max-w-[1380px] w-full mx-auto px-4 lg:px-7 py-5 pb-24 lg:pb-8">
       {% block content %}{% endblock %}
     </main>
 
+    <!-- Mobile Bottom Quick-Nav Bar (Fixed on Small Viewports) -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-[#E2E8F0] dark:border-slate-800 px-3 py-2 flex items-center justify-around shadow-lg" aria-label="Mobile Bottom Navigation">
+      <a href="{{ url_for('dashboard') }}" class="flex flex-col items-center gap-0.5 text-[10px] font-bold {% if request.endpoint == 'dashboard' %}text-[#0056D2] dark:text-[#38BDF8]{% else %}text-[#64748B] dark:text-slate-400 hover:text-[#0F172A]{% endif %}" aria-label="Dashboard">
+        <span class="text-base leading-none">📊</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('mock_interview') }}" class="flex flex-col items-center gap-0.5 text-[10px] font-bold {% if request.endpoint == 'mock_interview' %}text-[#0056D2] dark:text-[#38BDF8]{% else %}text-[#64748B] dark:text-slate-400 hover:text-[#0F172A]{% endif %}" aria-label="AI Mock Interview">
+        <span class="text-base leading-none">🎙️</span>
+        <span>Interview</span>
+      </a>
+      <a href="{{ url_for('assessment') }}" class="flex flex-col items-center gap-0.5 text-[10px] font-bold {% if request.endpoint in ('assessment', 'assessments') %}text-[#0056D2] dark:text-[#38BDF8]{% else %}text-[#64748B] dark:text-slate-400 hover:text-[#0F172A]{% endif %}" aria-label="Assessments">
+        <span class="text-base leading-none">📋</span>
+        <span>Assessments</span>
+      </a>
+      <a href="{{ url_for('certificate') }}" class="flex flex-col items-center gap-0.5 text-[10px] font-bold {% if request.endpoint == 'certificate' %}text-[#059669] dark:text-[#34D399]{% else %}text-[#64748B] dark:text-slate-400 hover:text-[#0F172A]{% endif %}" aria-label="Certificate">
+        <span class="text-base leading-none">🎓</span>
+        <span>Certificate</span>
+      </a>
+      <button type="button" onclick="toggleMobileDrawer()" class="flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#64748B] dark:text-slate-400 hover:text-[#0F172A]" aria-label="Open Navigation Drawer">
+        <span class="text-base leading-none">☰</span>
+        <span>Menu</span>
+      </button>
+    </nav>
+
     <!-- Coursera-Grade Footer -->
-    <footer class="app-footer bg-white border-t border-[#E2E8F0] py-5 px-4 lg:px-7 mt-auto">
-      <div class="footer-container max-w-[1380px] mx-auto flex items-center justify-between gap-3 flex-wrap text-xs text-[#64748B]">
+    <footer class="app-footer bg-white dark:bg-slate-900 border-t border-[#E2E8F0] dark:border-slate-800 py-5 px-4 lg:px-7 mt-auto transition-colors">
+      <div class="footer-container max-w-[1380px] mx-auto flex items-center justify-between gap-3 flex-wrap text-xs text-[#64748B] dark:text-slate-400">
         <div class="footer-left flex flex-col gap-0.5">
           <div class="footer-logo flex items-center gap-2">
-            <span class="text-sm font-bold text-[#0F172A]">SkillPath <strong class="text-[#0056D2]">AI</strong></span>
-            <span class="bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded text-[10px] font-bold">PromptWars X RTC</span>
+            <span class="text-sm font-bold text-[#0F172A] dark:text-white">SkillPath <strong class="text-[#0056D2] dark:text-[#38BDF8]">AI</strong></span>
+            <span class="bg-[#EFF6FF] dark:bg-slate-800 text-[#0056D2] dark:text-[#38BDF8] border border-[#BFDBFE] dark:border-slate-700 px-2 py-0.5 rounded text-[10px] font-bold">PromptWars X RTC</span>
           </div>
           <p class="text-[11px]">SkillPath AI — Adaptive Career &amp; Skill-Gap Intelligence &middot; 4-Agent Orchestration Engine</p>
         </div>
         <div class="footer-right flex items-center gap-2 flex-wrap">
-          <span class="bg-[#F1F5F9] border border-[#E2E8F0] px-2.5 py-0.5 rounded-full font-medium text-[11px]">Python 3 + Flask</span>
-          <span class="bg-[#F1F5F9] border border-[#E2E8F0] px-2.5 py-0.5 rounded-full font-medium text-[11px]">SQLite Store</span>
-          <span class="bg-[#F1F5F9] border border-[#E2E8F0] px-2.5 py-0.5 rounded-full font-medium text-[11px]">100% Responsive</span>
+          <span class="bg-[#F1F5F9] dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 px-2.5 py-0.5 rounded-full font-medium text-[11px]">Python 3 + Flask</span>
+          <span class="bg-[#F1F5F9] dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 px-2.5 py-0.5 rounded-full font-medium text-[11px]">SQLite Store</span>
+          <span class="bg-[#F1F5F9] dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 px-2.5 py-0.5 rounded-full font-medium text-[11px]">100% Responsive</span>
         </div>
       </div>
     </footer>

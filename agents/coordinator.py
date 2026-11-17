@@ -65,10 +65,10 @@ def orchestrate_learning_path(profile, assessments=None, completed_module_ids=No
         "recommendations": [b["role"] for b in matching["benchmarks"][:3]],
         "agent_logs": agent_logs,
         "agents": [
-            {"name": skill_analyzer.name, "badge": skill_analyzer.badge, "status": "Active"},
-            {"name": career_matcher.name, "badge": career_matcher.badge, "status": "Active"},
-            {"name": progress_evaluator.name, "badge": progress_evaluator.badge, "status": "Active"},
-            {"name": roadmap_generator.name, "badge": roadmap_generator.badge, "status": "Active"}
+            {"name": "Agent 1: Skill & GitHub Auditor", "badge": "Auditor", "status": "Active"},
+            {"name": "Agent 2: Market Gap Analyst", "badge": "Analyst", "status": "Active"},
+            {"name": "Agent 3: 30-60-90 Day Roadmap Architect", "badge": "Architect", "status": "Active"},
+            {"name": "Agent 4: AI Interview & Salary Coach", "badge": "Coach", "status": "Active"}
         ]
     }
 

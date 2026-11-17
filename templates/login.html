@@ -150,74 +150,26 @@
         </div>
       </div>
 
-      <!-- Right Column: Authentication Form & OAuth Buttons -->
+      <!-- Right Column: Authentication Form & Real-User Onboarding -->
       <div class="lg:col-span-6 p-8 lg:p-12 flex flex-col justify-center">
         
-        <!-- Social Sign-In Header -->
-        <div class="mb-4">
-          <span class="text-[10.5px] font-extrabold uppercase tracking-wider text-[#0056D2] bg-[#EFF6FF] border border-[#BFDBFE] px-2.5 py-0.5 rounded-full inline-block mb-1">
-            AUTHENTIC ONBOARDING
-          </span>
-          <h2 class="text-base sm:text-lg font-extrabold text-[#0F172A]">Sign In to Your Learning Workspace</h2>
-          <p class="text-xs text-[#64748B]">Continue with authenticated single-sign-on or enter your credentials.</p>
-        </div>
-
-        <!-- 1-Click Social Sign-In Buttons -->
-        <div class="space-y-2.5 mb-3">
-          <a href="{{ url_for('social_auth', provider='google') }}" onclick="handleSocialClick(event, 'google')" class="w-full flex items-center justify-center gap-3 bg-white border border-[#CBD5E1] hover:bg-[#F8FAFC] text-[#0F172A] font-semibold text-xs py-2.5 px-4 rounded-lg shadow-sm transition-all hover:-translate-y-0.5" aria-label="Continue with Google">
-            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-            <span>Continue with Google</span>
-          </a>
-
-          <a href="{{ url_for('social_auth', provider='github') }}" onclick="handleSocialClick(event, 'github')" class="w-full flex items-center justify-center gap-3 bg-white border border-[#CBD5E1] hover:bg-[#F8FAFC] text-[#0F172A] font-semibold text-xs py-2.5 px-4 rounded-lg shadow-sm transition-all hover:-translate-y-0.5" aria-label="Continue with GitHub">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-            <span>Continue with GitHub</span>
-          </a>
-
-          <a href="{{ url_for('social_auth', provider='linkedin') }}" onclick="handleSocialClick(event, 'linkedin')" class="w-full flex items-center justify-center gap-3 bg-white border border-[#CBD5E1] hover:bg-[#F8FAFC] text-[#0F172A] font-semibold text-xs py-2.5 px-4 rounded-lg shadow-sm transition-all hover:-translate-y-0.5" aria-label="Continue with LinkedIn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-            <span>Continue with LinkedIn</span>
-          </a>
-        </div>
-
-        <!-- Optional 1-Click Profile Customizer Accordion -->
+        <!-- Auth Header -->
         <div class="mb-5">
-          <button type="button" onclick="toggleOAuthCustomizer()" class="text-[11px] font-semibold text-[#0056D2] hover:underline inline-flex items-center gap-1">
-            <span>⚙️ Optional: Customize 1-Click Profile (Skills, Projects, Role)</span>
-            <span id="oauthCustomizerArrow">▼</span>
-          </button>
-          
-          <div id="oauthCustomizerPanel" class="hidden mt-2 p-3 bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl space-y-2 text-xs">
-            <span class="text-[10px] font-bold text-[#64748B] uppercase tracking-wide block">Real User Onboarding Attributes</span>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input type="text" id="oauthCustomName" aria-label="Custom Full Name" placeholder="Full Name (e.g. Jordan Lee)" class="text-xs px-2.5 py-1.5 border border-[#CBD5E1] rounded-lg bg-white">
-              <input type="email" id="oauthCustomEmail" aria-label="Custom Email Address" placeholder="Email (e.g. jordan.lee@domain.com)" class="text-xs px-2.5 py-1.5 border border-[#CBD5E1] rounded-lg bg-white">
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <select id="oauthCustomCareer" aria-label="Custom Target Career" class="text-xs px-2.5 py-1.5 border border-[#CBD5E1] rounded-lg bg-white">
-                {% for role in available_roles %}
-                  <option value="{{ role }}">{{ role }}</option>
-                {% endfor %}
-              </select>
-              <input type="text" id="oauthCustomSkills" aria-label="Custom Current Skills" placeholder="Current Skills (e.g. Python, SQL, React)" class="text-xs px-2.5 py-1.5 border border-[#CBD5E1] rounded-lg bg-white">
-            </div>
-            <input type="text" id="oauthCustomProjects" aria-label="Custom Projects" placeholder="Projects (e.g. Distributed backend API, Personal portfolio)" class="w-full text-xs px-2.5 py-1.5 border border-[#CBD5E1] rounded-lg bg-white">
-            <span class="text-[10px] text-[#64748B] block">When filled, clicking Google, GitHub, or LinkedIn onboards you with these exact attributes into SQLite.</span>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-[#0056D2] bg-[#EFF6FF] border border-[#BFDBFE] px-2.5 py-0.5 rounded-full inline-block">
+              REAL-USER AUTH · ZERO DEMO ACCOUNTS
+            </span>
           </div>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-[#0F172A] tracking-tight">Access Your Career Intelligence Workspace</h2>
+          <p class="text-xs text-[#64748B] mt-1">Sign in with your registered credentials or create an isolated, encrypted profile.</p>
         </div>
 
-        <!-- Divider -->
-        <div class="relative flex items-center justify-center mb-6">
-          <div class="border-t border-[#E2E8F0] w-full"></div>
-          <span class="bg-white px-3 text-xs font-semibold text-[#64748B] uppercase tracking-wider relative">Or continue with email</span>
-        </div>
-
-        <!-- Tab Controls: Sign In vs Sign Up -->
-        <div class="flex items-center bg-[#F1F5F9] p-1 rounded-lg mb-6 border border-[#E2E8F0]">
-          <button type="button" id="tabSignInBtn" onclick="switchAuthTab('signin')" aria-label="Switch to Sign In Tab" class="flex-1 py-1.5 text-xs font-bold rounded-md bg-white text-[#0056D2] shadow-sm transition-all">
+        <!-- Tab Controls: Sign In vs Create Real Account -->
+        <div class="flex items-center bg-[#F1F5F9] p-1 rounded-xl mb-6 border border-[#E2E8F0]">
+          <button type="button" id="tabSignInBtn" onclick="switchAuthTab('signin')" aria-label="Switch to Sign In Tab" class="flex-1 py-2 text-xs font-bold rounded-lg bg-white text-[#0056D2] shadow-sm transition-all">
             Sign In
           </button>
-          <button type="button" id="tabSignUpBtn" onclick="switchAuthTab('signup')" aria-label="Switch to Create Real Account Tab" class="flex-1 py-1.5 text-xs font-semibold text-[#64748B] rounded-md transition-all hover:text-[#0F172A]">
+          <button type="button" id="tabSignUpBtn" onclick="switchAuthTab('signup')" aria-label="Switch to Create Real Account Tab" class="flex-1 py-2 text-xs font-semibold text-[#64748B] rounded-lg transition-all hover:text-[#0F172A]">
             Create Real Account
           </button>
         </div>
@@ -227,80 +179,101 @@
           <input type="hidden" name="action" value="login">
 
           <div>
-            <label class="block text-xs font-bold text-[#0F172A] mb-1" for="loginEmail">Email Address</label>
+            <label class="block text-xs font-bold text-[#0F172A] mb-1.5" for="loginEmail">Email Address <span class="text-[#EF4444]">*</span></label>
             <input type="email" id="loginEmail" name="email" required placeholder="you@domain.com" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all">
           </div>
 
           <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-bold text-[#0F172A]" for="loginPassword">Password</label>
-              <a href="javascript:void(0)" onclick="alert('Demo/Evaluation: You can use pass123 or any password created at registration.')" class="text-[11px] text-[#0056D2] hover:underline">Forgot password?</a>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-bold text-[#0F172A]" for="loginPassword">Password <span class="text-[#EF4444]">*</span></label>
+              <span class="text-[11px] text-[#64748B]">Securely hashed via Werkzeug</span>
             </div>
             <input type="password" id="loginPassword" name="password" required placeholder="••••••••" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all">
           </div>
 
-          <div class="flex items-center gap-2">
-            <input type="checkbox" id="rememberMe" checked class="rounded border-[#CBD5E1] text-[#0056D2] focus:ring-[#0056D2]">
-            <label for="rememberMe" class="text-xs text-[#64748B]">Remember me on this browser</label>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="rememberMe" checked class="rounded border-[#CBD5E1] text-[#0056D2] focus:ring-[#0056D2]">
+              <label for="rememberMe" class="text-xs text-[#64748B]">Remember me on this device</label>
+            </div>
+            <button type="button" onclick="switchAuthTab('signup')" class="text-xs font-bold text-[#0056D2] hover:underline">New user? Register →</button>
           </div>
 
-          <button type="submit" aria-label="Sign In to SkillPath AI" class="w-full bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold py-2.5 rounded-lg shadow-sm transition-all hover:-translate-y-0.5">
+          <button type="submit" aria-label="Sign In to SkillPath AI" class="w-full bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold py-3 rounded-lg shadow-sm transition-all hover:-translate-y-0.5">
             Sign In to SkillPath AI →
           </button>
         </form>
 
-        <!-- Form 2: Manual Sign-Up (Initially Hidden) -->
+        <!-- Form 2: Real Account Creation (Initially Hidden) -->
         <form action="{{ url_for('login') }}" method="POST" id="signUpForm" class="space-y-3.5 hidden">
           <input type="hidden" name="action" value="signup">
 
           <div>
             <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupName">Full Name <span class="text-[#EF4444]">*</span></label>
-            <input type="text" id="signupName" name="name" required placeholder="e.g. Jordan Lee" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all">
+            <input type="text" id="signupName" name="name" required placeholder="e.g. Alex Kumar" class="w-full text-xs px-3.5 py-2 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all">
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupEmail">Email Address <span class="text-[#EF4444]">*</span></label>
-              <input type="email" id="signupEmail" name="email" required placeholder="jordan.lee@domain.com" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all">
+              <input type="email" id="signupEmail" name="email" required placeholder="alex@domain.com" class="w-full text-xs px-3.5 py-2 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all">
             </div>
 
             <div>
               <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupPassword">Password <span class="text-[#EF4444]">*</span></label>
-              <input type="password" id="signupPassword" name="password" required placeholder="Min. 6 characters" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all">
+              <input type="password" id="signupPassword" name="password" required placeholder="Min. 6 characters" class="w-full text-xs px-3.5 py-2 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all">
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
+              <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupCollege">College / Company / Organization</label>
+              <input type="text" id="signupCollege" name="college_company" placeholder="e.g. Stanford University / Tech Corp" class="w-full text-xs px-3.5 py-2 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] bg-white">
+            </div>
+
+            <div>
               <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupCareer">Target Career Track <span class="text-[#EF4444]">*</span></label>
-              <select id="signupCareer" name="career" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] bg-white">
+              <select id="signupCareer" name="career" class="w-full text-xs px-3.5 py-2 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] bg-white">
                 {% for role in available_roles %}
                   <option value="{{ role }}">{{ role }}</option>
                 {% endfor %}
               </select>
             </div>
+          </div>
 
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupExperience">Experience Level</label>
-              <select id="signupExperience" name="experience_level" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] bg-white">
+              <select id="signupExperience" name="experience_level" class="w-full text-xs px-3.5 py-2 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] bg-white">
                 <option value="Junior (0-2 yrs)">Junior (0-2 yrs)</option>
                 <option value="Mid-Level (2-5 yrs)">Mid-Level (2-5 yrs)</option>
                 <option value="Senior (5+ yrs)">Senior (5+ yrs)</option>
               </select>
             </div>
+
+            <div>
+              <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupGithub">Public GitHub Username (Live Skill Sync)</label>
+              <input type="text" id="signupGithub" name="github_username" placeholder="e.g. sudarsansenthilkumar33-gif" class="w-full text-xs px-3.5 py-2 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] bg-white">
+            </div>
+          </div>
+
+          <!-- GitHub Sync Live Callout -->
+          <div class="p-2.5 bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg text-[11px] text-[#166534] flex items-start gap-2">
+            <span class="text-sm shrink-0">✦</span>
+            <span><strong>Real GitHub Profile Sync:</strong> Entering your public GitHub handle automatically audits public repos, extracts languages, and auto-verifies technical skills without requiring an API key.</span>
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupSkills">Your Current Skills (Comma Separated)</label>
-            <input type="text" id="signupSkills" name="skills" placeholder="e.g. Python, SQL, Docker, HTML/CSS, Git" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all">
+            <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupSkills">Current Technical Skills (Comma Separated)</label>
+            <input type="text" id="signupSkills" name="skills" placeholder="e.g. Python, SQL, Docker, HTML/CSS, Git" class="w-full text-xs px-3.5 py-2 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all">
           </div>
 
           <div>
             <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupProjects">Projects / Background Summary</label>
-            <input type="text" id="signupProjects" name="projects" placeholder="e.g. Distributed backend API, Personal portfolio, Microservices" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all">
+            <input type="text" id="signupProjects" name="projects" placeholder="e.g. Distributed backend API, Personal portfolio, Microservices" class="w-full text-xs px-3.5 py-2 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 transition-all">
           </div>
 
-          <button type="submit" aria-label="Create Real Account & Synthesize 4-Agent Roadmap" class="w-full bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold py-2.5 rounded-lg shadow-sm transition-all hover:-translate-y-0.5">
+          <button type="submit" aria-label="Create Real Account & Synthesize 4-Agent Roadmap" class="w-full bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold py-3 rounded-lg shadow-sm transition-all hover:-translate-y-0.5">
             Create Real Account &amp; Synthesize 4-Agent Roadmap →
           </button>
         </form>

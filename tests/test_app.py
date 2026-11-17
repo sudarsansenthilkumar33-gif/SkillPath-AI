@@ -30,6 +30,7 @@ class TestSkillPathAIApp(unittest.TestCase):
         cls.client = app.test_client()
         with get_db() as con:
             con.execute("DELETE FROM users WHERE email LIKE '%@example.com' OR email LIKE '%@uniquedemo.com'")
+            con.execute("DELETE FROM users WHERE name LIKE '%Maya Patel%' OR email LIKE '%maya.patel%'")
             con.execute("DELETE FROM role_benchmarks WHERE role = 'Robotics Software Engineer'")
 
     def test_01_security_headers_present(self):
@@ -125,15 +126,18 @@ class TestSkillPathAIApp(unittest.TestCase):
         """Verify a newly registered user gets their own profile with zero demo data leak."""
         res = self.client.post("/login", data={
             "action": "signup",
-            "name": "Maya Lin",
-            "email": "maya.lin@uniquedemo.com",
-            "password": "pass123456Maya",
+            "name": "Meera Sundaram",
+            "email": "meera.sundaram@uniquedemo.com",
+            "password": "pass123456Meera",
             "career": "AI Engineer",
-            "skills": "Python, PyTorch, SQL"
+            "skills": "Python, PyTorch, SQL",
+            "college_company": "National Institute of Technology",
+            "github_username": "sudarsansenthilkumar33-gif"
         }, follow_redirects=True)
         self.assertEqual(res.status_code, 200)
-        self.assertIn(b"Maya Lin", res.data)
+        self.assertIn(b"Meera Sundaram", res.data)
         self.assertNotIn(b"Alex Chen", res.data)
+        self.assertNotIn(b"Maya Patel", res.data)
 
     def test_09_social_oauth_onboarding_flow(self):
         """Verify social 1-click onboarding creates custom profile and persists in SQLite."""
@@ -308,6 +312,21 @@ class TestSkillPathAIApp(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn(b"Resume Parsed", res.data)
         self.assertIn(b"ATS Match Score", res.data)
+
+    def test_23_github_profile_sync_api(self):
+        """Verify /api/sync-github fetches public repos and updates verified skills."""
+        res = self.client.post(
+            "/api/sync-github",
+            data=json.dumps({"github_username": "sudarsansenthilkumar33-gif"}),
+            content_type="application/json"
+        )
+        self.assertEqual(res.status_code, 200)
+        data = json.loads(res.data)
+        self.assertEqual(data["status"], "success")
+        self.assertEqual(data["username"], "sudarsansenthilkumar33-gif")
+        self.assertIn("languages", data)
+        self.assertIn("verified_skills", data)
+        self.assertGreaterEqual(data["xp_awarded"], 150)
 
 
 if __name__ == "__main__":

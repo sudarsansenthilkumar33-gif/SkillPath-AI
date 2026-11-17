@@ -39,7 +39,8 @@ from database import (
     generate_star_bullet_rewrites,
     generate_cover_letter_and_pitch,
     get_or_create_user_roadmap_tasks,
-    toggle_user_roadmap_task
+    toggle_user_roadmap_task,
+    sync_github_profile
 )
 from agents.coordinator import orchestrate_learning_path, mentor_reply
 
@@ -249,7 +250,8 @@ def index():
             password = request.form.get("password", "").strip()
             career = request.form.get("career", "Full Stack Developer").strip()
             skills = request.form.get("skills", "").strip() or "Python, SQL, HTML"
-            education = request.form.get("education", "").strip() or "Self-Taught / University Degree"
+            college_company = request.form.get("college_company", "").strip() or request.form.get("education", "").strip() or "Self-Taught / University Degree"
+            github_username = request.form.get("github_username", "").strip().lstrip("@")
             projects = request.form.get("projects", "").strip() or "Portfolio Projects"
             exp_level = request.form.get("experience_level", "").strip() or "Junior (0-2 yrs)"
             if not name or not email or not password:
@@ -257,7 +259,8 @@ def index():
                 return render_template("login.html")
             user, err = register_user(
                 name, email, password, auth_provider="local", target_career=career,
-                education=education, skills=skills, projects=projects
+                education=college_company, skills=skills, projects=projects,
+                college_company=college_company, github_username=github_username
             )
             if err:
                 flash(err, "warning")
@@ -268,13 +271,18 @@ def index():
             # Create matching learner profile
             save_profile({
                 "name": name,
-                "education": education,
-                "skills": skills,
+                "education": college_company,
+                "skills": user.get("skills") or skills,
                 "career": career,
                 "experience_level": exp_level,
-                "projects": projects
+                "projects": projects,
+                "college_company": college_company,
+                "github_username": github_username
             }, user_id=user["id"])
-            flash(f"Account created successfully! Welcome to SkillPath AI, {name}.", "success")
+            if github_username:
+                flash(f"Account created successfully! Welcome to SkillPath AI, {name}. GitHub @{github_username} audited & verified (+150 XP)!", "success")
+            else:
+                flash(f"Account created successfully! Welcome to SkillPath AI, {name}.", "success")
             return redirect(url_for("dashboard"))
 
         # 3. Profile Intake Form (Backward compatibility)
@@ -410,6 +418,18 @@ def toggle_roadmap_task_route():
     user_id = session.get("user_id") or 1
     new_state = toggle_user_roadmap_task(user_id, task_id)
     return jsonify({"status": "success", "task_id": task_id, "completed": new_state, "xp_awarded": 100})
+
+@app.route("/api/sync-github", methods=["POST"])
+def api_sync_github():
+    """Real Public GitHub Profile Sync (No API Key Required)"""
+    username = request.form.get("github_username") or (request.json.get("github_username") if request.is_json else "")
+    user_id = session.get("user_id")
+    if not username and user_id:
+        user = get_user_by_id(user_id)
+        if user:
+            username = user.get("github_username", "")
+    result = sync_github_profile(username, user_id=user_id)
+    return jsonify(result)
 
 @app.route("/report")
 def career_report():

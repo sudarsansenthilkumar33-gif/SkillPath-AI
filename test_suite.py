@@ -1,7 +1,7 @@
 import unittest
 import json
 from app import app
-from database import load_demo_profile, get_profile, get_assessments, get_completed_modules
+from database import load_demo_profile, get_profile, get_assessments, get_completed_modules, get_db
 
 class SkillPathMultiAgentTestSuite(unittest.TestCase):
     def setUp(self):
@@ -162,6 +162,9 @@ class SkillPathMultiAgentTestSuite(unittest.TestCase):
             self.assertIn(b"Dashboard", res.data)
 
         # 2. Test manual sign-up
+        with get_db() as con:
+            con.execute("DELETE FROM users WHERE email = 'jordan.lee@courserademo.edu'")
+            con.commit()
         res = self.client.post("/login", data={
             "action": "signup",
             "name": "Jordan Lee",
