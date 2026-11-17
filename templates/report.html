@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}SkillPath AI — Executive Career Intelligence &amp; Multi-Agent Audit Report{% endblock %}
+
+{% block extra_head %}
+<!-- Tailwind CSS CDN directly in head -->
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @media print {
+    header, footer, .workflow-banner, .no-print, #mobileDrawer, #mobileDrawerOverlay {
+      display: none !important;
+    }
+    body {
+      background: white !important;
+      color: black !important;
+    }
+    .report-card {
+      box-shadow: none !important;
+      border: 1px solid #CBD5E1 !important;
+      break-inside: avoid;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-shell max-w-5xl mx-auto space-y-6">
+
+  <!-- Print & Export Action Toolbar -->
+  <div class="no-print flex items-center justify-between bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-2xl p-4 shadow-sm flex-wrap gap-3">
+    <div class="flex items-center gap-2.5">
+      <span class="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-ping"></span>
+      <span class="text-xs font-bold text-[#0F172A] dark:text-slate-100">Official Executive Multi-Agent Audit Report Generated</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="window.print()" class="inline-flex items-center gap-2 bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all hover:-translate-y-0.5" aria-label="Print or Save PDF Report">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        <span>Print / Save PDF Report</span>
+      </button>
+      <a href="{{ url_for('dashboard') }}" class="text-xs font-semibold text-[#64748B] hover:text-[#0F172A] dark:hover:text-white px-3 py-2" aria-label="Return to Dashboard">
+        ← Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Document Header -->
+  <header class="report-card bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-3xl p-8 lg:p-10 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+    <div class="space-y-2">
+      <div class="inline-flex items-center gap-2 bg-[#EFF6FF] dark:bg-blue-950/60 text-[#0056D2] dark:text-blue-400 border border-[#BFDBFE] dark:border-blue-800 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider">
+        <span>✦</span> Enterprise Career Intelligence Audit
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-[#0F172A] dark:text-white tracking-tight">
+        {{ profile.name }} &middot; Career Readiness Assessment
+      </h1>
+      <p class="text-xs text-[#64748B] dark:text-slate-400 max-w-xl">
+        Benchmarked against global industry standards for <strong>{{ profile.career }}</strong> by the SkillPath AI 4-Agent Orchestration Engine.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-4 bg-[#F8FAFC] dark:bg-slate-800/60 border border-[#E2E8F0] dark:border-slate-700/60 p-4 rounded-2xl shrink-0">
+      <div class="text-center">
+        <span class="text-[10px] uppercase font-bold text-[#64748B] dark:text-slate-400 block">Overall Readiness</span>
+        <span class="text-3xl font-black text-[#0056D2] dark:text-blue-400">{{ plan.matching.target_readiness_pct }}%</span>
+      </div>
+      <div class="h-10 w-px bg-[#CBD5E1] dark:bg-slate-700"></div>
+      <div class="text-center">
+        <span class="text-[10px] uppercase font-bold text-[#64748B] dark:text-slate-400 block">ATS Score</span>
+        <span class="text-3xl font-black text-[#10B981]">{{ ats_scan.ats_score }}/100</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Bento Grid 1: 4 Agents Diagnostic Analysis -->
+  <section class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    
+    <!-- Agent 1: Resume Auditor & Skill Analyzer -->
+    <div class="report-card bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-3">
+      <div class="flex items-center justify-between border-b border-[#E2E8F0] dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🔍</span>
+          <div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-[#0056D2] dark:text-blue-400">Agent 1: Resume Auditor</h2>
+            <strong class="text-sm font-extrabold text-[#0F172A] dark:text-white">Structural &amp; Keyword Match Audit</strong>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold bg-[#ECFDF5] text-[#059669] px-2 py-0.5 rounded-full">Audited</span>
+      </div>
+      <div class="text-xs text-[#334155] dark:text-slate-300 space-y-2">
+        <p><strong>Keyword Density:</strong> {{ ats_scan.keyword_density }}% technical vocabulary saturation.</p>
+        <p><strong>Action Verbs Detected:</strong> {{ ats_scan.action_verbs_count }} leadership/engineering impact verbs.</p>
+        <p><strong>Quantifiable Metrics:</strong> {{ ats_scan.metrics_count }} quantified production results recorded.</p>
+      </div>
+    </div>
+
+    <!-- Agent 2: Market Gap Analyst -->
+    <div class="report-card bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-3">
+      <div class="flex items-center justify-between border-b border-[#E2E8F0] dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🎯</span>
+          <div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-[#0056D2] dark:text-blue-400">Agent 2: Market Gap Analyst</h2>
+            <strong class="text-sm font-extrabold text-[#0F172A] dark:text-white">Live Industry Stack Alignment</strong>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold bg-[#EFF6FF] text-[#0056D2] px-2 py-0.5 rounded-full">Benchmarked</span>
+      </div>
+      <div class="text-xs text-[#334155] dark:text-slate-300 space-y-2">
+        <div>
+          <strong class="text-[#059669] block mb-1">Validated Competencies ({{ plan.analysis.strengths|length }}):</strong>
+          <div class="flex flex-wrap gap-1">
+            {% for s in plan.analysis.strengths %}
+              <span class="bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] px-2 py-0.5 rounded text-[10.5px] font-semibold">{{ s.name }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="pt-2">
+          <strong class="text-[#D97706] block mb-1">Priority Growth Targets ({{ plan.analysis.missing|length }}):</strong>
+          <div class="flex flex-wrap gap-1">
+            {% for m in plan.analysis.missing %}
+              <span class="bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A] px-2 py-0.5 rounded text-[10.5px] font-semibold">{{ m.name }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent 3: Roadmap Architect -->
+    <div class="report-card bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-3">
+      <div class="flex items-center justify-between border-b border-[#E2E8F0] dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🗺️</span>
+          <div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-[#0056D2] dark:text-blue-400">Agent 3: Roadmap Architect</h2>
+            <strong class="text-sm font-extrabold text-[#0F172A] dark:text-white">Adaptive Learning Synthesis</strong>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold bg-[#F5F3FF] text-[#7C3AED] px-2 py-0.5 rounded-full">Active</span>
+      </div>
+      <p class="text-xs text-[#334155] dark:text-slate-300 leading-relaxed">
+        Curriculum configured for <strong>{{ profile.career }}</strong> across 3 dedicated phases totaling <strong>{{ plan.total_hours }} learning hours</strong> and hands-on lab modules.
+      </p>
+    </div>
+
+    <!-- Agent 4: Interview Coach -->
+    <div class="report-card bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-3">
+      <div class="flex items-center justify-between border-b border-[#E2E8F0] dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🎙️</span>
+          <div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-[#0056D2] dark:text-blue-400">Agent 4: Interview Coach</h2>
+            <strong class="text-sm font-extrabold text-[#0F172A] dark:text-white">STAR Rubric &amp; Behavioral Readiness</strong>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold bg-[#ECFDF5] text-[#059669] px-2 py-0.5 rounded-full">Ready</span>
+      </div>
+      <p class="text-xs text-[#334155] dark:text-slate-300 leading-relaxed">
+        Technical interview question bank tailored to system trade-offs, architecture patterns, and structured STAR narrative delivery.
+      </p>
+    </div>
+
+  </section>
+
+  <!-- 30-60-90 Day Actionable Roadmap Summary -->
+  <section class="report-card bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-3xl p-8 shadow-sm space-y-6">
+    <div>
+      <h2 class="text-lg font-extrabold text-[#0F172A] dark:text-white">30-60-90 Day Actionable Learning Sprint</h2>
+      <p class="text-xs text-[#64748B] dark:text-slate-400">Step-by-step milestones to achieve full role readiness and market competitiveness.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {% for sprint, tasks in roadmap_tasks.items() %}
+        <div class="border border-[#E2E8F0] dark:border-slate-800 rounded-2xl p-4 bg-[#F8FAFC] dark:bg-slate-800/40 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-[#E2E8F0] dark:border-slate-700">
+            <span class="text-xs font-extrabold text-[#0056D2] dark:text-blue-400 uppercase tracking-wider">{{ sprint }} Sprint</span>
+            <span class="text-[10px] font-bold bg-white dark:bg-slate-700 px-2 py-0.5 rounded text-[#64748B] dark:text-slate-300">{{ tasks|length }} Goals</span>
+          </div>
+          <ul class="space-y-2">
+            {% for t in tasks %}
+              <li class="text-xs text-[#334155] dark:text-slate-300 flex items-start gap-2">
+                <span class="{% if t.completed %}text-[#10B981]{% else %}text-[#CBD5E1]{% endif %} font-bold">{% if t.completed %}✓{% else %}○{% endif %}</span>
+                <span>{{ t.title }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Document Footer & Verification Stamp -->
+  <footer class="report-card bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-3xl p-6 shadow-sm flex items-center justify-between gap-4 flex-wrap text-xs text-[#64748B]">
+    <div>
+      <span class="font-bold text-[#0F172A] dark:text-white">SkillPath AI Career Intelligence Harness</span> &middot; Generated {{ export_date }}
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center gap-1.5 bg-[#EFF6FF] dark:bg-blue-950/60 text-[#0056D2] dark:text-blue-400 border border-[#BFDBFE] dark:border-blue-800 px-3 py-1 rounded-full text-[11px] font-bold">
+        <span>🔒 Verifiable Credential Valid</span>
+      </span>
+    </div>
+  </footer>
+
+</div>
+{% endblock %}

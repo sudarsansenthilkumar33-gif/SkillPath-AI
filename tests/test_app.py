@@ -239,6 +239,76 @@ class TestSkillPathAIApp(unittest.TestCase):
         completed = get_completed_modules(career)
         self.assertIn(module_id, completed)
 
+    def test_19_career_report_page(self):
+        """Verify /report renders executive Career Intelligence Report."""
+        res = self.client.get("/report")
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(b"Career Intelligence", res.data)
+        self.assertIn(b"30-60-90 Day Actionable Learning Sprint", res.data)
+        self.assertIn(b"Print / Save PDF Report", res.data)
+
+    def test_20_rewrite_bullet_api(self):
+        """Verify /api/rewrite-bullet transforms weak bullet into STAR format."""
+        payload = {
+            "bullet_text": "Helped backend team with database queries and made API faster",
+            "target_career": "Full Stack Developer"
+        }
+        res = self.client.post(
+            "/api/rewrite-bullet",
+            data=json.dumps(payload),
+            content_type="application/json"
+        )
+        self.assertEqual(res.status_code, 200)
+        data = json.loads(res.data)
+        self.assertEqual(data["status"], "success")
+        self.assertIn("rewrites", data)
+        self.assertEqual(len(data["rewrites"]), 3)
+        self.assertTrue(any("Architected" in rw or "Optimized" in rw or "Spearheaded" in rw for rw in data["rewrites"]))
+
+    def test_21_toggle_roadmap_task_api(self):
+        """Verify /api/toggle-roadmap-task toggles task completion state."""
+        # Seed user and task
+        with get_db() as con:
+            con.execute("""
+                INSERT OR IGNORE INTO roadmap_tasks (user_id, career, sprint_phase, task_id, title, description, completed)
+                VALUES (1, 'Full Stack Developer', '30-Day', 'test-task-1', 'Test Task', 'Desc', 0)
+            """)
+            row = con.execute("SELECT id FROM roadmap_tasks WHERE task_id = 'test-task-1' LIMIT 1").fetchone()
+            task_id = row["id"]
+
+        # Toggle to 1
+        res = self.client.post(
+            "/api/toggle-roadmap-task",
+            data=json.dumps({"task_id": task_id}),
+            content_type="application/json"
+        )
+        self.assertEqual(res.status_code, 200)
+        data = json.loads(res.data)
+        self.assertEqual(data["status"], "success")
+        self.assertEqual(data["completed"], 1)
+
+        # Toggle back to 0
+        res2 = self.client.post(
+            "/api/toggle-roadmap-task",
+            data=json.dumps({"task_id": task_id}),
+            content_type="application/json"
+        )
+        self.assertEqual(res2.status_code, 200)
+        data2 = json.loads(res2.data)
+        self.assertEqual(data2["completed"], 0)
+
+    def test_22_resume_file_upload_extraction_and_ats_score(self):
+        """Verify /extract-resume handles multipart file upload, extracts skills, and saves scan."""
+        import io
+        file_content = b"Software Engineer Resume:\nSkills: Python, React, SQL, Docker, FastAPI, Git, TypeScript.\nProjects: Designed high-throughput microservices reducing latency by 40%."
+        data = {
+            "resume_file": (io.BytesIO(file_content), "my_resume.txt")
+        }
+        res = self.client.post("/extract-resume", data=data, content_type="multipart/form-data", follow_redirects=True)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(b"Resume Parsed", res.data)
+        self.assertIn(b"ATS Match Score", res.data)
+
 
 if __name__ == "__main__":
     unittest.main()

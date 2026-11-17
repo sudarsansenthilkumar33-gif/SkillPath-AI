@@ -270,13 +270,24 @@
             </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupCareer">Target Career Track <span class="text-[#EF4444]">*</span></label>
-            <select id="signupCareer" name="career" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] bg-white">
-              {% for role in available_roles %}
-                <option value="{{ role }}">{{ role }}</option>
-              {% endfor %}
-            </select>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupCareer">Target Career Track <span class="text-[#EF4444]">*</span></label>
+              <select id="signupCareer" name="career" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] bg-white">
+                {% for role in available_roles %}
+                  <option value="{{ role }}">{{ role }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-[#0F172A] mb-1" for="signupExperience">Experience Level</label>
+              <select id="signupExperience" name="experience_level" class="w-full text-xs px-3.5 py-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] bg-white">
+                <option value="Junior (0-2 yrs)">Junior (0-2 yrs)</option>
+                <option value="Mid-Level (2-5 yrs)">Mid-Level (2-5 yrs)</option>
+                <option value="Senior (5+ yrs)">Senior (5+ yrs)</option>
+              </select>
+            </div>
           </div>
 
           <div>

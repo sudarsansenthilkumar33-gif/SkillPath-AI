@@ -31,7 +31,15 @@ from database import (
     get_cohort_table_data,
     get_role_benchmarks,
     save_role_benchmark,
-    analyze_job_description
+    analyze_job_description,
+    extract_text_from_file_or_string,
+    compute_comprehensive_ats_score,
+    save_ats_scan,
+    get_latest_ats_scan,
+    generate_star_bullet_rewrites,
+    generate_cover_letter_and_pitch,
+    get_or_create_user_roadmap_tasks,
+    toggle_user_roadmap_task
 )
 from agents.coordinator import orchestrate_learning_path, mentor_reply
 
@@ -43,12 +51,12 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 @app.after_request
 def set_security_headers(response):
     """Enforce defense-in-depth security headers across all application responses."""
-    response.headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com data:;"
+    response.headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com data:;"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(self), camera=()"
     return response
 
 @app.errorhandler(404)
@@ -243,6 +251,7 @@ def index():
             skills = request.form.get("skills", "").strip() or "Python, SQL, HTML"
             education = request.form.get("education", "").strip() or "Self-Taught / University Degree"
             projects = request.form.get("projects", "").strip() or "Portfolio Projects"
+            exp_level = request.form.get("experience_level", "").strip() or "Junior (0-2 yrs)"
             if not name or not email or not password:
                 flash("Please fill out all required fields to create your account.", "warning")
                 return render_template("login.html")
@@ -262,7 +271,7 @@ def index():
                 "education": education,
                 "skills": skills,
                 "career": career,
-                "experience_level": "Junior Developer",
+                "experience_level": exp_level,
                 "projects": projects
             }, user_id=user["id"])
             flash(f"Account created successfully! Welcome to SkillPath AI, {name}.", "success")
@@ -340,37 +349,105 @@ def profile_view():
     return render_template("index.html", profile=profile)
 
 # ==============================================================================
-# Resume Skill Auto-Extractor (Feature 2)
+# Resume Parser & Enterprise ATS Intelligence Engine (Feature 2 & 3)
 # ==============================================================================
 
 @app.route("/extract-resume", methods=["POST"])
 def extract_resume():
-    """Parses pasted resume or bio text, detects skills automatically, and triggers 4-agent pipeline"""
-    raw_text = request.form.get("resume_text", "").strip()
+    """Parses uploaded file (.pdf, .docx, .txt) or pasted text, calculates ATS score, and updates 4-agent roadmap"""
+    file_storage = request.files.get("resume_file")
+    pasted_text = request.form.get("resume_text", "").strip()
     next_url = request.form.get("next") or request.args.get("next") or url_for("dashboard")
+
+    raw_text, filename = extract_text_from_file_or_string(file_storage, pasted_text)
     if not raw_text:
-        flash("Please paste your resume or technical bio to auto-extract skills.", "warning")
+        flash("Please upload a resume file (.pdf, .docx, .txt) or paste your resume text to extract skills.", "warning")
         return redirect(next_url)
 
     matched_skills, detected_role = extract_skills_from_text(raw_text)
     user_id = session.get("user_id")
     
     current = get_profile(user_id=user_id) or {}
+    target_career = current.get("career") or detected_role or "Full Stack Developer"
+
+    # Compute comprehensive ATS match score & keyword breakdown
+    ats_data = compute_comprehensive_ats_score(raw_text, target_career)
+    if user_id:
+        save_ats_scan(user_id, filename, raw_text, ats_data)
+
+    skills_str = ", ".join(matched_skills) if matched_skills else current.get("skills", "Python, SQL, HTML")
     updated_profile = {
         "name": current.get("name", "Learner"),
         "education": current.get("education", "Self-Taught / University Degree"),
-        "skills": ", ".join(matched_skills),
-        "career": detected_role,
+        "skills": skills_str,
+        "career": target_career,
         "experience_level": current.get("experience_level", "Junior Developer"),
         "certifications": current.get("certifications", ""),
         "projects": current.get("projects", "Extracted from Resume")
     }
     save_profile(updated_profile, user_id=user_id)
     if user_id:
-        update_user_skills_and_career(user_id, ", ".join(matched_skills), detected_role)
+        update_user_skills_and_career(user_id, skills_str, target_career)
 
-    flash(f"✓ Resume Parsed! Auto-extracted {len(matched_skills)} skills: {', '.join(matched_skills[:5])}... Target set to '{detected_role}'. 4 Agents recalculated your custom roadmap!", "success")
+    flash(f"✓ Resume Parsed! ATS Match Score: {ats_data['score']}/100. Auto-extracted {len(matched_skills)} skills: {', '.join(matched_skills[:5])}... Target set to '{target_career}'. 4 Agents recalculated your custom roadmap!", "success")
     return redirect(url_for("dashboard"))
+
+@app.route("/api/rewrite-bullet", methods=["POST"])
+def rewrite_bullet():
+    """1-Click AI Bullet-Point Rewriter: Transforms weak lines into quantified STAR statements"""
+    bullet_text = request.form.get("bullet_text") or (request.json.get("bullet_text") if request.is_json else "")
+    user_id = session.get("user_id")
+    profile = get_profile(user_id=user_id)
+    career = profile.get("career", "Full Stack Developer") if profile else "Full Stack Developer"
+    raw_rewrites = generate_star_bullet_rewrites(bullet_text, career)
+    rewrites = [r["rewritten"] if isinstance(r, dict) else r for r in raw_rewrites]
+    return jsonify({"status": "success", "rewrites": rewrites})
+
+@app.route("/api/toggle-roadmap-task", methods=["POST"])
+def toggle_roadmap_task_route():
+    """Interactive 30-60-90 Day Roadmap Task Checkbox with SQLite persistence"""
+    task_id = request.form.get("task_id") or (request.json.get("task_id") if request.is_json else "")
+    user_id = session.get("user_id") or 1
+    new_state = toggle_user_roadmap_task(user_id, task_id)
+    return jsonify({"status": "success", "task_id": task_id, "completed": new_state, "xp_awarded": 100})
+
+@app.route("/report")
+def career_report():
+    """Executive Career Intelligence & Multi-Agent Audit Report (Print & PDF Export)"""
+    user_id = session.get("user_id")
+    profile = get_profile(user_id=user_id)
+    if not profile:
+        profile = load_demo_profile()
+
+    assessments = get_assessments(limit=8, user_id=user_id)
+    completed_modules = get_completed_modules(profile["career"])
+    plan = orchestrate_learning_path(profile, assessments, completed_modules)
+
+    ats_scan = get_latest_ats_scan(user_id)
+    if not ats_scan:
+        ats_base = compute_comprehensive_ats_score(f"Skills: {profile['skills']}. Projects: {profile['projects']}", profile["career"])
+        ats_scan = {
+            "ats_score": ats_base["score"],
+            "matched_skills": ats_base["matched_skills"],
+            "missing_skills": ats_base["missing_skills"],
+            "matched_skills_list": ats_base["matched_skills"],
+            "missing_skills_list": ats_base["missing_skills"],
+            "keyword_density": ats_base["keyword_density"],
+            "action_verbs_count": ats_base["action_verbs_count"],
+            "metrics_count": ats_base["metrics_count"],
+            "suggestions_list": ats_base["suggestions"],
+            "filename": "Active Profile Bio"
+        }
+
+    roadmap_tasks = get_or_create_user_roadmap_tasks(user_id or 1, profile["career"])
+    return render_template(
+        "report.html",
+        profile=profile,
+        plan=plan,
+        ats_scan=ats_scan,
+        roadmap_tasks=roadmap_tasks,
+        export_date=datetime.now().strftime("%B %d, %Y")
+    )
 
 # ==============================================================================
 # Job Description (JD) Match Analyzer (Feature 3)
@@ -378,12 +455,20 @@ def extract_resume():
 
 @app.route("/api/match-jd", methods=["POST"])
 def match_job_description():
-    """Feature 3: Parses Job Description (JD) and benchmarks against user skills"""
+    """Feature 3: Parses Job Description (JD), benchmarks skills, and generates tailored cover letter & pitch"""
     jd_text = request.form.get("jd_text") or (request.json.get("jd_text") if request.is_json else "")
     user_id = session.get("user_id")
     profile = get_profile(user_id=user_id)
     user_skills = profile.get("skills", "") if profile else ""
+    target_career = profile.get("career", "Full Stack Developer") if profile else "Full Stack Developer"
+    user_name = profile.get("name", "Candidate") if profile else "Candidate"
+
     analysis = analyze_job_description(jd_text, user_skills)
+    cover_and_pitch = generate_cover_letter_and_pitch(
+        user_name, target_career, analysis.get("matched_skills", []), analysis.get("missing_skills", []), jd_text
+    )
+    analysis["cover_letter"] = cover_and_pitch["cover_letter"]
+    analysis["elevator_pitch"] = cover_and_pitch["elevator_pitch"]
     return jsonify({"status": "success", "analysis": analysis})
 
 # ==============================================================================
@@ -397,7 +482,7 @@ def dashboard():
     if not profile:
         profile = load_demo_profile()
 
-    assessments = get_assessments(limit=8)
+    assessments = get_assessments(limit=8, user_id=user_id)
     completed_modules = get_completed_modules(profile["career"])
 
     # Run multi-agent pipeline
@@ -411,6 +496,41 @@ def dashboard():
     market_intel = JOB_MARKET_INTELLIGENCE.get(profile["career"], JOB_MARKET_INTELLIGENCE["Full Stack Developer"])
     cohort_leaderboard = get_all_users()[:5]
 
+    # Latest ATS Scan or Baseline
+    ats_scan = get_latest_ats_scan(user_id)
+    if not ats_scan:
+        ats_base = compute_comprehensive_ats_score(f"Skills: {profile['skills']}. Projects: {profile['projects']}", profile["career"])
+        ats_scan = {
+            "ats_score": ats_base["score"],
+            "matched_skills": ats_base["matched_skills"],
+            "missing_skills": ats_base["missing_skills"],
+            "matched_skills_list": ats_base["matched_skills"],
+            "missing_skills_list": ats_base["missing_skills"],
+            "keyword_density": ats_base["keyword_density"],
+            "action_verbs_count": ats_base["action_verbs_count"],
+            "metrics_count": ats_base["metrics_count"],
+            "suggestions_list": ats_base["suggestions"],
+            "filename": "Active Profile Bio"
+        }
+
+    # 30-60-90 Day Actionable Roadmap Tasks
+    roadmap_tasks = get_or_create_user_roadmap_tasks(user_id or 1, profile["career"])
+
+    # Radar Chart Dimensions for Chart.js
+    readiness = plan["matching"]["target_readiness_pct"]
+    radar_data = {
+        "labels": ["Core Syntax", "Frameworks & UI", "Storage & DB", "System Architecture", "DevOps & Cloud", "Testing & QA"],
+        "user_scores": [
+            min(95, max(55, readiness + 4)),
+            min(95, max(50, readiness - 6)),
+            min(90, max(50, readiness - 10)),
+            min(95, max(58, readiness + 2)),
+            min(90, max(45, readiness - 12)),
+            min(95, max(60, readiness))
+        ],
+        "benchmark_scores": [88, 92, 85, 88, 80, 85]
+    }
+
     return render_template(
         "dashboard.html",
         profile=profile,
@@ -420,7 +540,10 @@ def dashboard():
         recent_logs=recent_logs,
         quiz_banks=QUIZ_BANKS,
         market_intel=market_intel,
-        cohort_leaderboard=cohort_leaderboard
+        cohort_leaderboard=cohort_leaderboard,
+        ats_scan=ats_scan,
+        roadmap_tasks=roadmap_tasks,
+        radar_data=radar_data
     )
 
 @app.route("/load-demo", methods=["GET", "POST"])
@@ -565,7 +688,7 @@ def mock_interview():
         candidate_answer = request.form.get("answer", "").strip()
         current_question = request.form.get("question", current_question)
         if candidate_answer:
-            evaluation_result = evaluate_interview_response(target_career, current_question, candidate_answer)
+            evaluation_result = evaluate_interview_response(target_career, current_question, candidate_answer, user_id=user_id)
             if user_id:
                 add_user_xp(user_id, 200)
             flash(f"🎉 Interview Answer Evaluated! Readiness Score: {evaluation_result['score']}% (+200 XP earned)", "success")

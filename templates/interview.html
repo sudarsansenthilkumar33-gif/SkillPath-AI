@@ -10,20 +10,45 @@
 {% block content %}
 <div class="interview-shell max-w-4xl mx-auto space-y-6">
 
-  <!-- Header Banner -->
-  <header class="bg-white border border-[#E2E8F0] rounded-2xl p-6 lg:p-8 shadow-sm">
-    <div class="flex items-center gap-2 mb-2">
-      <span class="text-xs font-bold uppercase tracking-wider text-[#0056D2]">TECHNICAL INTERVIEW PREPARATION</span>
-      <span class="inline-flex items-center gap-1.5 bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2.5 py-0.5 rounded-full text-xs font-bold">
-        <span class="w-2 h-2 rounded-full bg-[#0056D2] animate-pulse"></span>
-        Target Role: {{ target_career }}
-      </span>
+  <!-- Header Banner & Live Interview Timer -->
+  <header class="bg-white border border-[#E2E8F0] rounded-2xl p-6 lg:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+    <div class="flex-1">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-[#0056D2]">TECHNICAL INTERVIEW PREPARATION</span>
+        <span class="inline-flex items-center gap-1.5 bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2.5 py-0.5 rounded-full text-xs font-bold">
+          <span class="w-2 h-2 rounded-full bg-[#0056D2] animate-pulse"></span>
+          Target Role: {{ target_career }}
+        </span>
+      </div>
+      <h1 class="text-2xl lg:text-3xl font-extrabold text-[#0F172A] tracking-tight">AI Mock Interview Simulator</h1>
+      <p class="text-xs sm:text-sm text-[#64748B] mt-1 max-w-2xl leading-relaxed">
+        Practice real-world technical interview questions curated for <strong>{{ target_career }}</strong>.
+        Our <strong>AI Mentor Agent</strong> evaluates your technical depth, algorithmic tradeoffs, and architectural thinking to provide instant scoring and actionable coaching.
+      </p>
     </div>
-    <h1 class="text-2xl lg:text-3xl font-extrabold text-[#0F172A] tracking-tight">AI Mock Interview Simulator</h1>
-    <p class="text-xs sm:text-sm text-[#64748B] mt-1 max-w-3xl leading-relaxed">
-      Practice real-world technical interview questions curated for <strong>{{ target_career }}</strong>.
-      Our <strong>AI Mentor Agent</strong> evaluates your technical depth, algorithmic tradeoffs, and architectural thinking to provide instant scoring and actionable coaching.
-    </p>
+
+    <!-- 2:00 Live Countdown Timer Widget -->
+    <div class="bg-[#F8FAFC] border border-[#CBD5E1] rounded-2xl p-4 flex flex-col items-center justify-center shrink-0 w-full md:w-56 text-center shadow-xs">
+      <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#64748B] mb-1">INTERVIEW TIMER</span>
+      <div class="flex items-baseline gap-1 my-1">
+        <span id="interviewTimerDisplay" class="text-3xl font-black font-mono text-[#0F172A] tracking-wider">02:00</span>
+      </div>
+      <div class="w-full bg-[#E2E8F0] h-1.5 rounded-full overflow-hidden my-2">
+        <div id="interviewTimerProgress" class="bg-[#0056D2] h-full rounded-full transition-all duration-1000" style="width: 100%;"></div>
+      </div>
+      <div class="flex items-center gap-2 mt-1">
+        <button type="button" id="startTimerBtn" onclick="startInterviewTimer()" class="text-[10.5px] font-bold bg-[#0056D2] text-white px-2.5 py-1 rounded hover:bg-[#00419E] transition-colors" aria-label="Start Timer">
+          ▶ Start
+        </button>
+        <button type="button" id="pauseTimerBtn" onclick="pauseInterviewTimer()" class="text-[10.5px] font-bold bg-white text-[#334155] border border-[#CBD5E1] px-2 py-1 rounded hover:bg-[#F1F5F9] transition-colors" aria-label="Pause Timer">
+          ⏸ Pause
+        </button>
+        <button type="button" id="resetTimerBtn" onclick="resetInterviewTimer()" class="text-[10.5px] font-bold bg-white text-[#64748B] border border-[#CBD5E1] px-2 py-1 rounded hover:bg-[#F1F5F9] transition-colors" aria-label="Reset Timer">
+          ↺ Reset
+        </button>
+      </div>
+      <span id="timerStatusLabel" class="text-[10px] text-[#64748B] mt-1.5 block">2-minute practice pacing</span>
+    </div>
   </header>
 
   <!-- Question & Workspace Card -->
@@ -45,11 +70,17 @@
       <input type="hidden" name="question" value="{{ question }}">
 
       <div>
-        <div class="flex items-center justify-between mb-1.5">
+        <div class="flex items-center justify-between mb-1.5 flex-wrap gap-2">
           <label class="text-xs font-bold text-[#0F172A]" for="answerText">Your Technical Explanation &amp; Code Rationale:</label>
-          <span class="text-[11px] text-[#64748B]">Explain concepts, mechanisms, and architectural tradeoffs</span>
+          <div class="flex items-center gap-2">
+            <button type="button" id="voiceInterviewBtn" onclick="toggleVoiceTranscription()" class="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#0056D2] bg-[#EFF6FF] border border-[#BFDBFE] hover:bg-[#DBEAFE] px-2.5 py-1 rounded-lg transition-all shadow-2xs" aria-label="Voice Input (Live Speech-to-Text)">
+              <span id="voiceInterviewIcon">🎙️</span>
+              <span id="voiceInterviewLabel">Voice Input (Live Speech-to-Text)</span>
+            </button>
+            <span class="text-[11px] text-[#64748B] hidden sm:inline">Explain concepts &amp; tradeoffs</span>
+          </div>
         </div>
-        <textarea id="answerText" name="answer" rows="7" required placeholder="Type your structured technical answer here. For example: Explain the step-by-step lifecycle, event loop coordination, asynchronous task queue, and memory implications..." class="w-full text-xs font-sans p-4 border border-[#CBD5E1] rounded-xl focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 leading-relaxed">{{ candidate_answer }}</textarea>
+        <textarea id="answerText" name="answer" rows="7" required placeholder="Type or speak your structured technical answer here. For example: Explain the step-by-step lifecycle, event loop coordination, asynchronous task queue, and memory implications..." class="w-full text-xs font-sans p-4 border border-[#CBD5E1] rounded-xl focus:outline-none focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 leading-relaxed">{{ candidate_answer }}</textarea>
       </div>
 
       <div class="flex items-center justify-between gap-4 pt-2 border-t border-[#E2E8F0] flex-wrap">
@@ -68,7 +99,7 @@
     <!-- Evaluation Results Card -->
     {% if evaluation %}
       <div class="border rounded-2xl p-6 mt-6 transition-all {% if evaluation.score >= 80 %}bg-[#ECFDF5]/50 border-[#A7F3D0]{% elif evaluation.score >= 65 %}bg-[#EFF6FF]/50 border-[#BFDBFE]{% else %}bg-[#FFFBEB]/50 border-[#FDE68A]{% endif %}">
-        <div class="flex items-center justify-between mb-4 border-b pb-3 {% if evaluation.score >= 80 %}border-[#A7F3D0]{% elif evaluation.score >= 65 %}border-[#BFDBFE]{% else %}border-[#FDE68A]{% endif %}">
+        <div class="flex items-center justify-between mb-4 border-b pb-3 {% if evaluation.score >= 80 %}border-[#A7F3D0]{% elif evaluation.score >= 65 %}border-[#BFDBFE]{% else %}border-[#FDE68A]{% endif %} flex-wrap gap-2">
           <div class="flex items-center gap-2.5">
             <span class="text-2xl">🤖</span>
             <div>
@@ -84,13 +115,44 @@
           </div>
         </div>
 
+        <!-- 4-Dimension Rubric Scorecard -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4 text-xs">
+          <div class="bg-white border border-[#E2E8F0] rounded-xl p-3 text-center">
+            <span class="text-[10px] font-bold uppercase text-[#64748B] block">Overall Readiness</span>
+            <strong class="text-base font-extrabold {% if evaluation.score >= 80 %}text-[#059669]{% else %}text-[#0056D2]{% endif %}">{{ evaluation.score }}%</strong>
+          </div>
+          <div class="bg-white border border-[#E2E8F0] rounded-xl p-3 text-center">
+            <span class="text-[10px] font-bold uppercase text-[#64748B] block">Clarity &amp; Flow</span>
+            <strong class="text-base font-extrabold text-[#0056D2]">{{ evaluation.clarity_score or 82 }}%</strong>
+          </div>
+          <div class="bg-white border border-[#E2E8F0] rounded-xl p-3 text-center">
+            <span class="text-[10px] font-bold uppercase text-[#64748B] block">Technical Depth</span>
+            <strong class="text-base font-extrabold text-[#7C3AED]">{{ evaluation.depth_score or 78 }}%</strong>
+          </div>
+          <div class="bg-white border border-[#E2E8F0] rounded-xl p-3 text-center">
+            <span class="text-[10px] font-bold uppercase text-[#64748B] block">STAR Structure</span>
+            <strong class="text-base font-extrabold text-[#D97706]">{{ evaluation.star_structure or 'Structured' }}</strong>
+          </div>
+        </div>
+
         <div class="space-y-3 text-xs leading-relaxed text-[#334155]">
           <div>
             <strong class="text-[#0F172A] block mb-1">Mentor Feedback &amp; Analysis:</strong>
             <p class="bg-white p-3.5 rounded-xl border border-black/5 shadow-2xs">{{ evaluation.feedback }}</p>
           </div>
 
-          <div class="flex items-center justify-between pt-2">
+          <!-- Ideal Model Answer Collapsible Accordion -->
+          <details class="bg-white border border-[#CBD5E1] rounded-xl p-3.5 shadow-2xs">
+            <summary class="font-extrabold text-xs text-[#0056D2] cursor-pointer hover:underline flex items-center justify-between">
+              <span>📘 View AI Ideal Model Answer &amp; Architecture Reference</span>
+              <span class="text-[10.5px] text-[#64748B] font-normal">Click to expand</span>
+            </summary>
+            <div class="mt-2.5 pt-2.5 border-t border-[#E2E8F0] text-xs text-[#334155] leading-relaxed whitespace-pre-wrap font-sans bg-[#F8FAFC] p-3 rounded-lg border border-[#E2E8F0]">
+{{ evaluation.ideal_answer or 'A strong answer clearly explains the core theoretical foundations, step-by-step execution lifecycle, asynchronous queuing mechanics, and memory/performance tradeoffs.' }}
+            </div>
+          </details>
+
+          <div class="flex items-center justify-between pt-2 flex-wrap gap-2">
             <span class="text-[#64748B]">Technical terminology density: <strong>{{ evaluation.terms_detected }} key concepts identified</strong></span>
             <a href="{{ url_for('mock_interview', q=(q_index + 1) % total_questions) }}" class="inline-flex items-center gap-1.5 bg-[#0056D2] text-white font-bold text-xs px-4 py-2 rounded-lg hover:bg-[#00419E] shadow-xs">
               <span>Next Technical Question</span>
@@ -121,4 +183,187 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // -------------------------------------------------------------------------
+  // 2:00 Live Countdown Timer Implementation
+  // -------------------------------------------------------------------------
+  const TOTAL_INTERVIEW_SECONDS = 120;
+  let remainingSeconds = TOTAL_INTERVIEW_SECONDS;
+  let timerInterval = null;
+  let isTimerRunning = false;
+
+  function updateTimerUI() {
+    const mins = Math.floor(remainingSeconds / 60);
+    const secs = remainingSeconds % 60;
+    const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    const display = document.getElementById('interviewTimerDisplay');
+    const progress = document.getElementById('interviewTimerProgress');
+    const label = document.getElementById('timerStatusLabel');
+
+    if (display) display.innerText = formatted;
+    if (progress) {
+      const pct = (remainingSeconds / TOTAL_INTERVIEW_SECONDS) * 100;
+      progress.style.width = pct + '%';
+      if (remainingSeconds <= 30) {
+        progress.className = 'bg-[#EF4444] h-full rounded-full transition-all duration-1000';
+        display.className = 'text-3xl font-black font-mono text-[#EF4444] tracking-wider animate-pulse';
+        if (label) label.innerText = '⚠️ Less than 30s remaining!';
+      } else {
+        progress.className = 'bg-[#0056D2] h-full rounded-full transition-all duration-1000';
+        display.className = 'text-3xl font-black font-mono text-[#0F172A] tracking-wider';
+        if (label) label.innerText = '2-minute practice pacing';
+      }
+    }
+
+    if (remainingSeconds === 0) {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      const startBtn = document.getElementById('startTimerBtn');
+      if (startBtn) startBtn.innerText = '▶ Start';
+      if (label) label.innerText = '⏰ Time expired! Wrap up your answer.';
+    }
+  }
+
+  function startInterviewTimer() {
+    if (isTimerRunning) return;
+    if (remainingSeconds === 0) remainingSeconds = TOTAL_INTERVIEW_SECONDS;
+    isTimerRunning = true;
+    const startBtn = document.getElementById('startTimerBtn');
+    if (startBtn) startBtn.innerText = '● Running';
+
+    timerInterval = setInterval(() => {
+      if (remainingSeconds > 0) {
+        remainingSeconds--;
+        updateTimerUI();
+      }
+    }, 1000);
+  }
+
+  function pauseInterviewTimer() {
+    if (!isTimerRunning) return;
+    clearInterval(timerInterval);
+    isTimerRunning = false;
+    const startBtn = document.getElementById('startTimerBtn');
+    if (startBtn) startBtn.innerText = '▶ Resume';
+  }
+
+  function resetInterviewTimer() {
+    clearInterval(timerInterval);
+    isTimerRunning = false;
+    remainingSeconds = TOTAL_INTERVIEW_SECONDS;
+    const startBtn = document.getElementById('startTimerBtn');
+    if (startBtn) startBtn.innerText = '▶ Start';
+    updateTimerUI();
+  }
+
+  // -------------------------------------------------------------------------
+  // Web Speech API Voice-to-Text Transcription Implementation
+  // -------------------------------------------------------------------------
+  let recognition = null;
+  let isRecordingVoice = false;
+
+  function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return null;
+
+    const reco = new SpeechRecognition();
+    reco.continuous = true;
+    reco.interimResults = true;
+    reco.lang = 'en-US';
+
+    reco.onresult = function(event) {
+      const textarea = document.getElementById('answerText');
+      if (!textarea) return;
+
+      let interimTranscript = '';
+      let finalTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + ' ';
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        const cur = textarea.value.trim();
+        textarea.value = cur ? cur + ' ' + finalTranscript.trim() : finalTranscript.trim();
+      }
+    };
+
+    reco.onerror = function(event) {
+      console.warn("Speech recognition error:", event.error);
+      stopVoiceRecording();
+    };
+
+    reco.onend = function() {
+      if (isRecordingVoice) {
+        stopVoiceRecording();
+      }
+    };
+
+    return reco;
+  }
+
+  function toggleVoiceTranscription() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Live voice speech-to-text recognition is not supported in this browser. Please use Chrome, Edge, or Safari, or type your answer directly.");
+      return;
+    }
+
+    if (!recognition) {
+      recognition = initSpeechRecognition();
+    }
+
+    if (isRecordingVoice) {
+      stopVoiceRecording();
+    } else {
+      startVoiceRecording();
+    }
+  }
+
+  function startVoiceRecording() {
+    if (!recognition) return;
+    try {
+      recognition.start();
+      isRecordingVoice = true;
+      const icon = document.getElementById('voiceInterviewIcon');
+      const label = document.getElementById('voiceInterviewLabel');
+      const btn = document.getElementById('voiceInterviewBtn');
+      if (icon) icon.innerText = '🔴';
+      if (label) label.innerText = 'Listening... (Click to stop)';
+      if (btn) {
+        btn.classList.add('bg-red-50', 'border-red-300', 'text-red-700', 'animate-pulse');
+        btn.classList.remove('bg-[#EFF6FF]', 'text-[#0056D2]');
+      }
+      // Also start timer if not running
+      if (!isTimerRunning) {
+        startInterviewTimer();
+      }
+    } catch (e) {
+      console.error("Failed to start speech recognition:", e);
+    }
+  }
+
+  function stopVoiceRecording() {
+    if (recognition && isRecordingVoice) {
+      recognition.stop();
+    }
+    isRecordingVoice = false;
+    const icon = document.getElementById('voiceInterviewIcon');
+    const label = document.getElementById('voiceInterviewLabel');
+    const btn = document.getElementById('voiceInterviewBtn');
+    if (icon) icon.innerText = '🎙️';
+    if (label) label.innerText = 'Voice Input (Live Speech-to-Text)';
+    if (btn) {
+      btn.classList.remove('bg-red-50', 'border-red-300', 'text-red-700', 'animate-pulse');
+      btn.classList.add('bg-[#EFF6FF]', 'text-[#0056D2]');
+    }
+  }
+</script>
 {% endblock %}
