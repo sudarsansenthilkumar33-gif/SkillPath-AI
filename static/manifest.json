@@ -1,0 +1,48 @@
+{
+  "name": "SkillPath AI — Career Intelligence",
+  "short_name": "SkillPath AI",
+  "description": "Autonomous Multi-Agent Adaptive Career & Skill-Gap Intelligence Platform.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "categories": ["education", "productivity", "career"],
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "View skill radar and 30-60-90 roadmap"
+    },
+    {
+      "name": "AI Mock Interview",
+      "url": "/interview",
+      "description": "Practice role-specific mock interview questions"
+    },
+    {
+      "name": "Assessments",
+      "url": "/assessments",
+      "description": "Take diagnostic skill assessments"
+    },
+    {
+      "name": "Skill Certificate",
+      "url": "/certificate",
+      "description": "View verifiable QR skill credential"
+    }
+  ]
+}

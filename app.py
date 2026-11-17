@@ -1,7 +1,7 @@
 import os
 import hashlib
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, send_from_directory
 from database import (
     init_db,
     get_db,
@@ -52,12 +52,27 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 @app.after_request
 def set_security_headers(response):
     """Enforce defense-in-depth security headers across all application responses."""
-    response.headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com data:;"
+    response.headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com data:; worker-src 'self' blob:; manifest-src 'self';"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(self), camera=()"
+    return response
+
+@app.route("/manifest.json")
+def manifest():
+    """Serve PWA manifest with correct JSON MIME type."""
+    response = send_from_directory(os.path.join(app.root_path, "static"), "manifest.json", mimetype="application/manifest+json")
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    return response
+
+@app.route("/sw.js")
+def service_worker():
+    """Serve PWA service worker with root scope permission."""
+    response = send_from_directory(os.path.join(app.root_path, "static"), "sw.js", mimetype="application/javascript")
+    response.headers["Service-Worker-Allowed"] = "/"
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     return response
 
 @app.errorhandler(404)

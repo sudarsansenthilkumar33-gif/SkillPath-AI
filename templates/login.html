@@ -35,6 +35,15 @@
   
   <!-- Clean Custom Coursera CSS System -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <!-- Progressive Web App (PWA) Manifest & Meta -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SkillPath AI">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
 </head>
 <body class="coursera-theme bg-[#F8FAFC] text-[#0F172A] font-sans min-h-screen flex flex-col justify-between">
   <!-- Skip to Main Content Link for Keyboard & Screen Reader Accessibility -->
@@ -55,6 +64,15 @@
     </a>
 
     <nav aria-label="Portal Navigation" class="flex items-center gap-3">
+      <!-- PWA Install Button -->
+      <button type="button" onclick="triggerPwaInstall()" class="pwa-install-trigger inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg shadow-xs hover:shadow transition-all" aria-label="Install SkillPath AI App">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Install App</span>
+      </button>
       <a href="{{ url_for('admin_portal') }}" class="text-xs font-semibold text-[#64748B] hover:text-[#0056D2] transition-colors" aria-label="Admin Portal">
         Admin Portal →
       </a>
@@ -344,6 +362,60 @@
         if (skills) params.append('skills', skills);
         if (projects) params.append('projects', projects);
         window.location.href = `/auth/social/${provider}?` + params.toString();
+      }
+    }
+
+    // Progressive Web App (PWA) Service Worker Registration & Install Trigger
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+          .then(function(reg) {
+            console.log('[PWA] ServiceWorker registered with scope:', reg.scope);
+          })
+          .catch(function(err) {
+            console.warn('[PWA] ServiceWorker registration failed:', err);
+          });
+      });
+    }
+
+    let deferredPrompt = null;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (!isStandalone) {
+        document.querySelectorAll('.pwa-install-trigger').forEach(function(btn) {
+          btn.classList.remove('hidden');
+        });
+      }
+    });
+
+    window.addEventListener('appinstalled', function() {
+      console.log('[PWA] SkillPath AI app was installed successfully');
+      deferredPrompt = null;
+      document.querySelectorAll('.pwa-install-trigger').forEach(function(btn) {
+        btn.classList.add('hidden');
+      });
+    });
+
+    if (isStandalone) {
+      document.querySelectorAll('.pwa-install-trigger').forEach(function(btn) {
+        btn.classList.add('hidden');
+      });
+    }
+
+    function triggerPwaInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(choiceResult) {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('[PWA] User accepted installation');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        alert('To install SkillPath AI:\n• On Chrome/Edge: click the Install icon in the address bar or Menu (⋮) -> "Install SkillPath AI"\n• On Android: tap Menu (⋮) -> "Add to Home screen"\n• On iOS: tap Share (⎋) -> "Add to Home Screen"');
       }
     }
   </script>

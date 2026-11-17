@@ -328,6 +328,62 @@ class TestSkillPathAIApp(unittest.TestCase):
         self.assertIn("verified_skills", data)
         self.assertGreaterEqual(data["xp_awarded"], 150)
 
+    def test_24_pwa_manifest_endpoint(self):
+        """Verify /manifest.json serves valid PWA specification with required metadata."""
+        res = self.client.get("/manifest.json")
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("application/manifest+json", res.headers.get("Content-Type", ""))
+        manifest_data = json.loads(res.data)
+        self.assertEqual(manifest_data["name"], "SkillPath AI — Career Intelligence")
+        self.assertEqual(manifest_data["short_name"], "SkillPath AI")
+        self.assertEqual(manifest_data["start_url"], "/")
+        self.assertEqual(manifest_data["display"], "standalone")
+        self.assertEqual(manifest_data["background_color"], "#0f172a")
+        self.assertEqual(manifest_data["theme_color"], "#2563eb")
+        sizes = [icon["sizes"] for icon in manifest_data.get("icons", [])]
+        self.assertIn("192x192", sizes)
+        self.assertIn("512x512", sizes)
+
+    def test_25_pwa_service_worker_endpoint(self):
+        """Verify /sw.js serves Progressive Web App service worker with root scope."""
+        res = self.client.get("/sw.js")
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("javascript", res.headers.get("Content-Type", ""))
+        self.assertEqual(res.headers.get("Service-Worker-Allowed"), "/")
+        self.assertIn(b"CACHE_NAME", res.data)
+        self.assertIn(b"caches.open", res.data)
+
+    def test_26_pwa_icons_and_meta_tags(self):
+        """Verify PWA icons exist and templates include manifest and install triggers."""
+        # Icons exist
+        res192 = self.client.get("/static/icons/icon-192.png")
+        self.assertEqual(res192.status_code, 200)
+        self.assertEqual(res192.data[:8], b"\x89PNG\r\n\x1a\n")
+
+        res512 = self.client.get("/static/icons/icon-512.png")
+        self.assertEqual(res512.status_code, 200)
+        self.assertEqual(res512.data[:8], b"\x89PNG\r\n\x1a\n")
+
+        # HTML links
+        res_login = self.client.get("/login")
+        self.assertIn(b'rel="manifest"', res_login.data)
+        self.assertIn(b'content="#2563eb"', res_login.data)
+        self.assertIn(b"pwa-install-trigger", res_login.data)
+        self.assertIn(b"/sw.js", res_login.data)
+
+        # Authenticate and check base.html rendering in dashboard
+        self.client.post("/login", data={
+            "action": "login",
+            "email": "test.security.user@example.com",
+            "password": "SecurePass#2026"
+        }, follow_redirects=True)
+        res_dash = self.client.get("/dashboard")
+        self.assertEqual(res_dash.status_code, 200)
+        self.assertIn(b'rel="manifest"', res_dash.data)
+        self.assertIn(b'content="#2563eb"', res_dash.data)
+        self.assertIn(b"pwa-install-trigger", res_dash.data)
+        self.assertIn(b"/sw.js", res_dash.data)
+
 
 if __name__ == "__main__":
     unittest.main()
