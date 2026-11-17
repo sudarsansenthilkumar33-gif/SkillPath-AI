@@ -246,6 +246,23 @@ def init_db():
             )
         """)
 
+        # User Custom Learning Modules / Target Milestones
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS user_custom_modules (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                career TEXT NOT NULL,
+                phase_number TEXT NOT NULL DEFAULT '2',
+                title TEXT NOT NULL,
+                hours TEXT DEFAULT '8 hours',
+                resource_url TEXT DEFAULT '',
+                project_desc TEXT DEFAULT '',
+                completed INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        """)
+
         # Performance Indexes for SQLite efficiency
         con.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
         con.execute("CREATE INDEX IF NOT EXISTS idx_users_xp ON users(xp);")
@@ -256,27 +273,19 @@ def init_db():
         con.execute("CREATE INDEX IF NOT EXISTS idx_role_benchmarks_role ON role_benchmarks(role);")
         con.execute("CREATE INDEX IF NOT EXISTS idx_ats_scans_user ON ats_scans(user_id);")
         con.execute("CREATE INDEX IF NOT EXISTS idx_roadmap_tasks_user ON roadmap_tasks(user_id, career);")
+        con.execute("CREATE INDEX IF NOT EXISTS idx_user_custom_modules ON user_custom_modules(user_id, career);")
 
-        # Purge legacy demo names
-        con.execute("DELETE FROM users WHERE name LIKE '%Maya Patel%' OR email LIKE '%maya.patel%'")
-        con.execute("DELETE FROM users WHERE name LIKE '%Elena Rostova%' OR email LIKE '%elena.rostova%'")
-
-        # Seed initial cohort users if none exist
-        user_count = con.execute("SELECT COUNT(*) as cnt FROM users").fetchone()["cnt"]
-        if user_count == 0:
-            default_pass = generate_password_hash("pass123")
-            admin_pass = generate_password_hash("admin123")
-            initial_users = [
-                ("learner@skillpath.ai", "Verified Learner", default_pass, "local", "VL", "Full Stack Developer", "Learner", "B.S. EECS", "Python, SQL, HTML, CSS", "RESTful Microservices, Real-time Dashboard", "AWS Certified Developer", 1350, 6),
-                ("sarah.jenkins@stanford.edu", "Sarah Jenkins", default_pass, "google", "SJ", "Data Scientist", "Learner", "M.S. Applied Statistics", "Python, SQL, Pandas, NumPy", "Customer Churn Predictor", "Google Data Analytics", 1600, 7),
-                ("priya.sharma@techcorp.io", "Priya Sharma", default_pass, "github", "PS", "AI Engineer", "Learner", "B.Tech Computer Engineering", "Python, PyTorch, LangChain", "Enterprise RAG Assistant", "DeepLearning.AI", 950, 3),
-                ("david.miller@cloudops.net", "David Miller", default_pass, "linkedin", "DM", "DevOps & Cloud Engineer", "Learner", "B.S. Information Systems", "Linux, Docker, AWS", "Kubernetes Multi-Node Cluster", "AWS Solutions Architect", 1400, 6),
-                ("marcus.vance@mit.edu", "Dr. Marcus Vance", admin_pass, "local", "MV", "AI Engineer", "Admin", "Ph.D. Computer Science (MIT)", "Python, PyTorch, Transformers, Agentic AI", "Autonomous Multi-Agent Harness", "IEEE Senior Fellow", 2800, 14)
-            ]
-            con.executemany("""
-                INSERT INTO users (email, name, password_hash, auth_provider, avatar, target_career, role, education, skills, projects, certifications, xp, streak_days)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, initial_users)
+        # Purge legacy demo names and seeded dummy users — strictly store real registered learners
+        con.execute("""
+            DELETE FROM users WHERE name IN (
+                'Dr. Marcus Vance', 'Sarah Jenkins', 'David Miller', 'Elena Rostova', 
+                'Priya Sharma', 'Marcus Vance', 'Verified Learner', 'Maya Patel'
+            ) OR email IN (
+                'marcus.vance@mit.edu', 'sarah.jenkins@stanford.edu', 'david.miller@cloudops.net', 
+                'elena.rostova@berkeleysystems.org', 'priya.sharma@techcorp.io', 'learner@skillpath.ai',
+                'alex.chen@techcorp.com', 'maya.patel@example.com'
+            )
+        """)
 
         # Seed curriculum benchmarks if none exist
         bench_count = con.execute("SELECT COUNT(*) as cnt FROM role_benchmarks").fetchone()["cnt"]
@@ -1107,9 +1116,9 @@ def get_platform_kpis():
     ]
 
     return {
-        "total_learners": max(user_cnt, 5),
+        "total_learners": user_cnt,
         "avg_readiness": avg_pct,
-        "remedial_interventions": max(remedial_cnt, 1),
+        "remedial_interventions": remedial_cnt,
         "total_assessments": total_tests,
         "top_skill_gaps": skill_gaps
     }
@@ -1604,4 +1613,51 @@ def toggle_user_roadmap_task(user_id: int, task_id: Any) -> int:
         if new_val:
             con.execute("UPDATE users SET xp = xp + 100 WHERE id = ?", (user_id,))
         return new_val
+
+# ==============================================================================
+# User Custom Learning Modules / Target Milestones
+# ==============================================================================
+
+def add_user_custom_module(user_id: int, career: str, title: str, phase_number: str = "2", hours: str = "8 hours", resource_url: str = "", project_desc: str = "") -> int:
+    """Inserts a custom self-directed module or milestone for the user in SQLite and awards +100 XP."""
+    with get_db() as con:
+        cur = con.execute("""
+            INSERT INTO user_custom_modules (user_id, career, phase_number, title, hours, resource_url, project_desc, completed)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+        """, (user_id, career, str(phase_number), title.strip(), hours.strip() or "8 hours", resource_url.strip(), project_desc.strip()))
+        custom_id = cur.lastrowid
+        con.execute("UPDATE users SET xp = xp + 100 WHERE id = ?", (user_id,))
+    return custom_id
+
+def get_user_custom_modules(user_id: int, career: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Retrieve all custom modules defined by a specific user."""
+    with get_db() as con:
+        if career:
+            rows = con.execute("""
+                SELECT id, user_id, career, phase_number, title, hours, resource_url, project_desc, completed, created_at
+                FROM user_custom_modules
+                WHERE user_id = ? AND career = ?
+                ORDER BY id ASC
+            """, (user_id, career)).fetchall()
+        else:
+            rows = con.execute("""
+                SELECT id, user_id, career, phase_number, title, hours, resource_url, project_desc, completed, created_at
+                FROM user_custom_modules
+                WHERE user_id = ?
+                ORDER BY id ASC
+            """, (user_id,)).fetchall()
+    return [dict(r) for r in rows]
+
+def toggle_user_custom_module(user_id: int, custom_id: int) -> int:
+    """Toggle completion status for a custom module and award +250 XP upon completion."""
+    with get_db() as con:
+        row = con.execute("SELECT completed FROM user_custom_modules WHERE id = ? AND user_id = ?", (custom_id, user_id)).fetchone()
+        if not row:
+            return 0
+        new_val = 0 if row["completed"] else 1
+        con.execute("UPDATE user_custom_modules SET completed = ? WHERE id = ? AND user_id = ?", (new_val, custom_id, user_id))
+        if new_val:
+            con.execute("UPDATE users SET xp = xp + 250 WHERE id = ?", (user_id,))
+        return new_val
+
 

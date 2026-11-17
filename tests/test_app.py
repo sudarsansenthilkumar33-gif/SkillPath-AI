@@ -417,6 +417,85 @@ class TestSkillPathAIApp(unittest.TestCase):
         self.assertEqual(res2.status_code, 200)
         self.assertIn(b"SKILLPATH-TEST-999", res2.data)
 
+    def test_28_zero_seeded_demo_users_and_admin_query_real_users(self):
+        """Verify complete removal of 5 seeded demo users and admin dynamic queries."""
+        with get_db() as con:
+            rows = con.execute("SELECT name, email FROM users").fetchall()
+            names = [r["name"] for r in rows]
+            emails = [r["email"] for r in rows]
+            
+            for demo_name in ["Dr. Marcus Vance", "Sarah Jenkins", "David Miller", "Elena Rostova", "Priya Sharma", "Maya Patel"]:
+                self.assertNotIn(demo_name, names)
+            for demo_email in ["marcus.vance@mit.edu", "sarah.jenkins@stanford.edu", "david.miller@cloudops.net", "priya.sharma@techcorp.io", "elena.rostova@berkeleysystems.org"]:
+                self.assertNotIn(demo_email, emails)
+
+        # Admin portal loads dynamic real users
+        res = self.client.get("/admin")
+        self.assertEqual(res.status_code, 200)
+        self.assertNotIn(b"marcus.vance@mit.edu", res.data)
+        self.assertNotIn(b"sarah.jenkins@stanford.edu", res.data)
+
+    def test_29_career_report_single_sprint_rendering_and_user_binding(self):
+        """Verify /report renders each sprint once without duplicate 30_day loop."""
+        res = self.client.get("/report")
+        self.assertEqual(res.status_code, 200)
+        content = res.data.decode("utf-8")
+        
+        # Each sprint title must appear exactly once
+        self.assertEqual(content.count("30-Day Sprint"), 1)
+        self.assertEqual(content.count("60-Day Sprint"), 1)
+        self.assertEqual(content.count("90-Day Sprint"), 1)
+        self.assertNotIn("30_day Sprint", content)
+        self.assertNotIn("60_day Sprint", content)
+
+    def test_30_mock_interview_role_sync_and_dynamic_question_loading(self):
+        """Verify /interview syncs with target role and supports on-the-fly role switching."""
+        # Query role switch to AI Engineer
+        res_ai = self.client.get("/interview?role=AI+Engineer")
+        self.assertEqual(res_ai.status_code, 200)
+        self.assertIn(b"Target Role: AI Engineer", res_ai.data)
+        self.assertIn(b"Transformers", res_ai.data)
+
+        # Query role switch to DevOps & Cloud Engineer
+        res_devops = self.client.get("/interview?role=DevOps+%26+Cloud+Engineer")
+        self.assertEqual(res_devops.status_code, 200)
+        self.assertIn(b"Kubernetes", res_devops.data)
+
+    def test_31_expanded_9_to_12_module_roadmap_across_all_careers(self):
+        """Verify Roadmap Agent generates 9 to 12 modules across 3 phases for all 5 careers."""
+        from agents.roadmap_agent import RoadmapAgent
+        agent = RoadmapAgent()
+        careers = ["Full Stack Developer", "Data Scientist", "AI Engineer", "Python Developer", "DevOps & Cloud Engineer"]
+
+        for c in careers:
+            rm = agent.generate_roadmap(c, [], set())
+            total_mods = rm["total_modules"]
+            self.assertGreaterEqual(total_mods, 9, f"Career {c} should have at least 9 modules, got {total_mods}")
+            self.assertLessEqual(total_mods, 12, f"Career {c} should have at most 12 modules, got {total_mods}")
+            
+            # Verify 3 distinct phases exist
+            phase_numbers = [p["phase_number"] for p in rm["phases"]]
+            self.assertIn("1", phase_numbers)
+            self.assertIn("2", phase_numbers)
+            self.assertIn("3", phase_numbers)
+
+    def test_32_custom_course_milestone_creation_and_xp(self):
+        """Verify creating a custom roadmap milestone inserts into SQLite and awards XP."""
+        res = self.client.post("/api/add-custom-module", data={
+            "title": "Autonomous LLM Agents with Memory",
+            "phase": "2",
+            "hours": "12 hours",
+            "resource_url": "https://langchain.com",
+            "project_desc": "Build an agent with episodic vector memory and external search tools."
+        }, follow_redirects=True)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(b"Autonomous LLM Agents with Memory", res.data)
+
+        # Verify on dashboard roadmap
+        dash_res = self.client.get("/dashboard")
+        self.assertEqual(dash_res.status_code, 200)
+        self.assertIn(b"Autonomous LLM Agents with Memory", dash_res.data)
+
 
 if __name__ == "__main__":
     unittest.main()

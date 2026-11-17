@@ -168,10 +168,11 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-      {% for sprint, tasks in roadmap_tasks.items() %}
+      {% for sprint_title, sprint_key in [('30-Day Sprint', '30-Day'), ('60-Day Sprint', '60-Day'), ('90-Day Sprint', '90-Day')] %}
+        {% set tasks = roadmap_tasks.get(sprint_key) or roadmap_tasks.get(sprint_key.lower().replace('-', '_')) or [] %}
         <div class="border border-[#E2E8F0] dark:border-slate-800 rounded-2xl p-4 bg-[#F8FAFC] dark:bg-slate-800/40 space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-[#E2E8F0] dark:border-slate-700">
-            <span class="text-xs font-extrabold text-[#0056D2] dark:text-blue-400 uppercase tracking-wider">{{ sprint }} Sprint</span>
+            <span class="text-xs font-extrabold text-[#0056D2] dark:text-blue-400 uppercase tracking-wider">{{ sprint_title }}</span>
             <span class="text-[10px] font-bold bg-white dark:bg-slate-700 px-2 py-0.5 rounded text-[#64748B] dark:text-slate-300">{{ tasks|length }} Goals</span>
           </div>
           <ul class="space-y-2">

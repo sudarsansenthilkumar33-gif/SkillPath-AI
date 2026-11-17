@@ -912,6 +912,60 @@
           Check off modules as you complete them to track progress in SQLite.
         </p>
 
+        <!-- Add Custom Milestone / Course Trigger & Drawer -->
+        <div class="mb-6">
+          <details class="group bg-[#F8FAFC] border border-[#CBD5E1] rounded-2xl overflow-hidden transition-all shadow-xs">
+            <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-[#F1F5F9] font-bold text-xs text-[#0056D2] transition-colors select-none">
+              <span class="flex items-center gap-2">
+                <span class="text-base">➕</span>
+                <span class="text-sm font-extrabold text-[#0F172A]">Add Custom Course / Target Milestone</span>
+                <span class="text-[10px] bg-[#EFF6FF] text-[#0056D2] border border-[#BFDBFE] px-2 py-0.5 rounded-full font-bold">+100 XP</span>
+              </span>
+              <span class="text-xs text-[#64748B] group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            
+            <form action="{{ url_for('add_custom_goal') }}" method="POST" class="p-5 border-t border-[#E2E8F0] space-y-4 bg-white">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2 space-y-1">
+                  <label for="customModTitle" class="block text-xs font-bold text-[#0F172A]">Course or Milestone Title *</label>
+                  <input type="text" id="customModTitle" name="title" required placeholder="e.g., Deep Learning with Graph Neural Networks (GNNs)" class="w-full text-xs p-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-1 focus:ring-[#0056D2]">
+                </div>
+                <div class="space-y-1">
+                  <label for="customModPhase" class="block text-xs font-bold text-[#0F172A]">Roadmap Phase *</label>
+                  <select id="customModPhase" name="phase" class="w-full text-xs p-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-1 focus:ring-[#0056D2] bg-white">
+                    <option value="1">Phase 1: Foundations & Missing Skills</option>
+                    <option value="2" selected>Phase 2: Hands-On Capstone Builds</option>
+                    <option value="3">Phase 3: Production & Interview Mastery</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                  <label for="customModHours" class="block text-xs font-bold text-[#0F172A]">Estimated Hours</label>
+                  <input type="text" id="customModHours" name="hours" placeholder="e.g., 10 hours" value="8 hours" class="w-full text-xs p-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-1 focus:ring-[#0056D2]">
+                </div>
+                <div class="space-y-1">
+                  <label for="customModUrl" class="block text-xs font-bold text-[#0F172A]">Resource or Documentation URL</label>
+                  <input type="url" id="customModUrl" name="resource_url" placeholder="https://pytorch-geometric.readthedocs.io/" class="w-full text-xs p-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-1 focus:ring-[#0056D2]">
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <label for="customModProject" class="block text-xs font-bold text-[#0F172A]">Hands-On Project / Key Deliverable Task</label>
+                <input type="text" id="customModProject" name="project_desc" placeholder="e.g., Build a molecular property prediction model using PyTorch Geometric and evaluate test ROC-AUC" class="w-full text-xs p-2.5 border border-[#CBD5E1] rounded-lg focus:outline-none focus:border-[#0056D2] focus:ring-1 focus:ring-[#0056D2]">
+              </div>
+
+              <div class="flex items-center justify-end gap-3 pt-2">
+                <button type="submit" class="inline-flex items-center gap-2 bg-[#0056D2] hover:bg-[#00419E] text-white text-xs font-bold px-5 py-2.5 rounded-lg shadow-sm transition-all hover:-translate-y-0.5">
+                  <span>+ Add Milestone to Roadmap</span>
+                  <span class="text-[10px] bg-white/20 px-1.5 py-0.2 rounded">+100 XP</span>
+                </button>
+              </div>
+            </form>
+          </details>
+        </div>
+
         <!-- Phased Containers Stack -->
         <div class="space-y-6">
           {% for phase in plan.roadmap.phases %}
@@ -1170,6 +1224,11 @@
                 <strong class="text-[#0056D2] font-black text-xs block">{{ u.xp or 750 }} XP</strong>
                 <span class="text-[10px] text-[#92400E] font-bold">🔥 {{ u.streak_days or 3 }}d</span>
               </div>
+            </div>
+          {% else %}
+            <div class="p-4 text-center text-xs text-[#64748B] bg-[#F8FAFC] rounded-xl border border-dashed border-[#CBD5E1]">
+              <span class="text-lg block mb-1">🎯</span>
+              No other learners on the leaderboard yet. Share your achievements and invite cohort peers!
             </div>
           {% endfor %}
         </div>

@@ -40,7 +40,10 @@ from database import (
     generate_cover_letter_and_pitch,
     get_or_create_user_roadmap_tasks,
     toggle_user_roadmap_task,
-    sync_github_profile
+    sync_github_profile,
+    add_user_custom_module,
+    get_user_custom_modules,
+    toggle_user_custom_module
 )
 from agents.coordinator import orchestrate_learning_path, mentor_reply
 
@@ -464,7 +467,8 @@ def career_report():
 
     assessments = get_assessments(limit=8, user_id=user_id)
     completed_modules = get_completed_modules(target_role)
-    plan = orchestrate_learning_path(profile, assessments, completed_modules)
+    custom_modules = get_user_custom_modules(user_id, target_role)
+    plan = orchestrate_learning_path(profile, assessments, completed_modules, custom_modules=custom_modules)
     readiness_score = plan["matching"]["target_readiness_pct"]
 
     ats_scan = get_latest_ats_scan(user_id)
@@ -536,9 +540,10 @@ def dashboard():
 
     assessments = get_assessments(limit=8, user_id=user_id)
     completed_modules = get_completed_modules(profile["career"])
+    custom_modules = get_user_custom_modules(user_id, profile["career"]) if user_id else []
 
     # Run multi-agent pipeline
-    plan = orchestrate_learning_path(profile, assessments, completed_modules)
+    plan = orchestrate_learning_path(profile, assessments, completed_modules, custom_modules=custom_modules)
 
     # Save agent collaboration logs to SQLite for auditability
     save_agent_logs(plan["agent_logs"])
@@ -713,10 +718,44 @@ def toggle_module():
     module_id = request.form.get("module_id", "").strip()
     user_id = session.get("user_id")
     if career and module_id:
-        is_completed = toggle_module_progress(career, module_id, user_id=user_id)
+        if module_id.startswith("custom-mod-"):
+            try:
+                custom_id = int(module_id.replace("custom-mod-", ""))
+                is_completed = toggle_user_custom_module(user_id or 1, custom_id)
+            except Exception:
+                is_completed = 1
+        else:
+            is_completed = toggle_module_progress(career, module_id, user_id=user_id)
         status_str = "completed (+250 XP)" if is_completed else "marked in-progress"
         flash(f"Module '{module_id}' {status_str}! Progress updated in SQLite.", "info")
     return redirect(url_for("dashboard"))
+
+@app.route("/api/add-custom-module", methods=["POST"])
+@app.route("/add-custom-goal", methods=["POST"])
+def add_custom_goal():
+    """Add a custom user course or target milestone to the personalized roadmap"""
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Please log in to add custom roadmap milestones.", "warning")
+        return redirect(url_for("login"))
+
+    title = request.form.get("title", "").strip()
+    phase = request.form.get("phase", "2").strip()
+    hours = request.form.get("hours", "8 hours").strip()
+    resource_url = request.form.get("resource_url", "").strip()
+    project_desc = request.form.get("project_desc", "").strip()
+
+    user = get_user_by_id(user_id)
+    profile = get_profile(user_id=user_id) or {}
+    career = user.get("target_career") or profile.get("career") or "Full Stack Developer"
+
+    if title:
+        add_user_custom_module(user_id, career, title, phase, hours, resource_url, project_desc)
+        flash(f"✓ Custom target milestone '{title}' added to your roadmap (+100 XP)!", "success")
+    else:
+        flash("Please provide a milestone title.", "warning")
+
+    return redirect(url_for("dashboard") + "#roadmap-curriculum")
 
 # ==============================================================================
 # AI Mock Interview Simulator (Feature 5)
@@ -726,9 +765,18 @@ def toggle_module():
 def mock_interview():
     """AI Technical Interview Simulator for Target Career Roles"""
     user_id = session.get("user_id")
-    profile = get_profile(user_id=user_id) or load_demo_profile()
-    target_career = profile.get("career", "Full Stack Developer")
-    
+    user = get_user_by_id(user_id) if user_id else None
+    profile = get_profile(user_id=user_id) or ({"name": user["name"], "career": user["target_career"]} if user else load_demo_profile())
+
+    role_arg = request.values.get("role") or request.args.get("role")
+    target_career = role_arg or (user.get("target_career") if user else None) or profile.get("career") or "Full Stack Developer"
+    if target_career not in MOCK_INTERVIEW_QUESTIONS:
+        target_career = "Full Stack Developer"
+
+    profile["career"] = target_career
+    if user:
+        profile["name"] = user["name"]
+
     questions = MOCK_INTERVIEW_QUESTIONS.get(target_career, MOCK_INTERVIEW_QUESTIONS["Full Stack Developer"])
     q_index = int(request.args.get("q", 0)) % len(questions)
     current_question = questions[q_index]
@@ -751,6 +799,7 @@ def mock_interview():
         "interview.html",
         profile=profile,
         target_career=target_career,
+        available_roles=AVAILABLE_ROLES,
         question=current_question,
         q_index=q_index,
         total_questions=len(questions),
@@ -781,7 +830,8 @@ def certificate():
 
     assessments = get_assessments(limit=8, user_id=user_id)
     completed_modules = get_completed_modules(target_role)
-    plan = orchestrate_learning_path(profile, assessments, completed_modules)
+    custom_modules = get_user_custom_modules(user_id, target_role)
+    plan = orchestrate_learning_path(profile, assessments, completed_modules, custom_modules=custom_modules)
     readiness_score = plan["matching"]["target_readiness_pct"]
 
     # Generate unique verifiable credential ID

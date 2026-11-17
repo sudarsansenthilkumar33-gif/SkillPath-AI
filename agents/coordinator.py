@@ -9,7 +9,7 @@ career_matcher = CareerMatcherAgent()
 roadmap_generator = RoadmapAgent()
 progress_evaluator = ProgressEvaluatorAgent()
 
-def orchestrate_learning_path(profile, assessments=None, completed_module_ids=None):
+def orchestrate_learning_path(profile, assessments=None, completed_module_ids=None, custom_modules=None):
     """
     Multi-Agent Coordination Pipeline:
     Coordinates Skill Analyzer, Career Matcher, Progress Evaluator, and Roadmap Recommender.
@@ -45,7 +45,8 @@ def orchestrate_learning_path(profile, assessments=None, completed_module_ids=No
         target_career=target_career,
         missing_skills=analysis["missing"],
         completed_module_ids=completed_module_ids,
-        remediation_data=remediation_data
+        remediation_data=remediation_data,
+        custom_modules=custom_modules
     )
     agent_logs.append(roadmap_data["log"])
 

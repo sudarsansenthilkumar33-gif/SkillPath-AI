@@ -208,6 +208,16 @@
                 </a>
               </td>
             </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" class="py-8 px-6 text-center text-sm text-[#64748B]">
+                <div class="max-w-md mx-auto space-y-2">
+                  <div class="text-2xl">👥</div>
+                  <strong class="text-[#0F172A] block font-bold">No registered learners found in SQLite</strong>
+                  <p class="text-xs text-[#64748B]">When real learners register and complete assessments, their readiness percentage, strengths, and sprint status will populate this cohort matrix automatically.</p>
+                </div>
+              </td>
+            </tr>
           {% endfor %}
         </tbody>
       </table>
